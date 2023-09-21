@@ -78,21 +78,21 @@ test_zebras = test_zebras.map(
 sample_horse = next(iter(train_horses))
 sample_zebra = next(iter(train_zebras))
 
-plt.subplot(121)
-plt.title('Horse')
-plt.imshow(sample_horse[0] * 0.5 + 0.5)
+# plt.subplot(121)
+# plt.title('Horse')
+# plt.imshow(sample_horse[0] * 0.5 + 0.5)
 
-plt.subplot(122)
-plt.title('Horse with random jitter')
-plt.imshow(random_jitter(sample_horse[0]) * 0.5 + 0.5)
+# plt.subplot(122)
+# plt.title('Horse with random jitter')
+# plt.imshow(random_jitter(sample_horse[0]) * 0.5 + 0.5)
 
-plt.subplot(121)
-plt.title('Zebra')
-plt.imshow(sample_zebra[0] * 0.5 + 0.5)
+# plt.subplot(121)
+# plt.title('Zebra')
+# plt.imshow(sample_zebra[0] * 0.5 + 0.5)
 
-plt.subplot(122)
-plt.title('Zebra with random jitter')
-plt.imshow(random_jitter(sample_zebra[0]) * 0.5 + 0.5)
+# plt.subplot(122)
+# plt.title('Zebra with random jitter')
+# plt.imshow(random_jitter(sample_zebra[0]) * 0.5 + 0.5)
 
 
 OUTPUT_CHANNELS = 3
@@ -166,7 +166,7 @@ discriminator_x_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 discriminator_y_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 
 
-checkpoint_path = "./checkpoints/train"
+checkpoint_path = "./train_checkpoints"
 
 ckpt = tf.train.Checkpoint(generator_g=generator_g,
                            generator_f=generator_f,
@@ -186,9 +186,9 @@ if ckpt_manager.latest_checkpoint:
 
 
 # Training
-EPOCHS = 10
+EPOCHS = 200
 
-def generate_images(model, test_input):
+def generate_images(model, test_input, fnum = 0):
     prediction = model(test_input)
 
     plt.figure(figsize=(12, 12))
@@ -202,7 +202,8 @@ def generate_images(model, test_input):
         # getting the pixel values between [0, 1] to plot it.
         plt.imshow(display_list[i] * 0.5 + 0.5)
         plt.axis('off')
-    plt.show()
+    plt.savefig(f'figure_{fnum}.png')
+    # plt.show()
 
 @tf.function
 def train_step(real_x, real_y):
@@ -278,7 +279,7 @@ for epoch in range(EPOCHS):
     clear_output(wait=True)
     # Using a consistent image (sample_horse) so that the progress of the model
     # is clearly visible.
-    generate_images(generator_g, sample_horse)
+    generate_images(generator_g, sample_horse, epoch // 1000)
 
     if (epoch + 1) % 5 == 0:
         ckpt_save_path = ckpt_manager.save()
