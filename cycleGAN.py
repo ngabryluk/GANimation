@@ -302,10 +302,10 @@ c_AB = CombineModel(g_AB, g_BA, d_B, name="GanAB")
 c_BA = CombineModel(g_BA, g_AB, d_A, name="GanBA")
 
 # # it's time to give them the superior knowledge.
-# train(d_A, d_B, g_AB, g_BA, c_AB, c_BA, epochs=100, chunk=5)
-# g_AB.save("GeneratorHtoZ.h5")
-# g_BA.save("GeneratorZtoH.h5")
+train(d_A, d_B, g_AB, g_BA, c_AB, c_BA, epochs=15, chunk=5)
+g_AB.save("GeneratorHtoZ.h5")
+g_BA.save("GeneratorZtoH.h5")
 
-HtoZ_gen = load_model("../input/imagetoimage-translation-cyclegan/GeneratorHtoZ.h5")
-ZtoH_gen = load_model("../input/imagetoimage-translation-cyclegan/GeneratorZtoH.h5")
+HtoZ_gen = load_model(os.path.join(os.getcwd(), "GeneratorHtoZ.h5"))
+ZtoH_gen = load_model(os.path.join(os.getcwd(), "GeneratorZtoH.h5"))
 show_preds(HtoZ_gen, ZtoH_gen, n_images=5)
