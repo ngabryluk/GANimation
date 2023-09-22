@@ -213,7 +213,7 @@ def update_image_pool(pool, images, max_size=50):
             pool[ix] = image
     return np.asarray(selected)
 
-def show_preds(g_AB, g_BA,n_images=1):
+def show_preds(g_AB, g_BA,n_images=1, fnum=0):
     for i in range(n_images):
         
         id = np.random.randint(len(horse_images))
@@ -235,7 +235,7 @@ def show_preds(g_AB, g_BA,n_images=1):
         show_image(horse_pred, title='Genrated Horse')
         
         plt.tight_layout()
-        plt.savefig(f'figure_{i}.png')
+        plt.savefig(f'figure_{fnum}.png')
 
 def train(d_model_A, d_model_B, gen_AB, gen_BA, c_AB, c_BA, epochs=10, chunk=5):
     
@@ -285,7 +285,7 @@ def train(d_model_A, d_model_B, gen_AB, gen_BA, c_AB, c_BA, epochs=10, chunk=5):
             dB_loss_2 = d_model_B.train_on_batch(X_fakeB, y_fakeB)
 
         if (j%chunk)==0:
-            show_preds(gen_AB, gen_BA, n_images=1)
+            show_preds(gen_AB, gen_BA, n_images=1, fnum = j // 1000)
             gen_AB.save("GeneratorHtoZ.h5")
             gen_BA.save("GeneratorZtoH.h5")
 
