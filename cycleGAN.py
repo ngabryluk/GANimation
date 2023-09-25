@@ -261,7 +261,7 @@ def train(d_model_A, d_model_B, gen_AB, gen_BA, c_AB, c_BA, epochs=10, chunk=5):
             
             # create a pool of images. You can also understand it like a replay buffer.
             X_fakeA = update_image_pool(poolA, X_fakeA)
-            X_fakeB = update_image_pool(poolA, X_fakeB)
+            X_fakeB = update_image_pool(poolB, X_fakeB)
             
             
             # Let's finally train the gen 2 and get the losses.
@@ -302,7 +302,7 @@ c_AB = CombineModel(g_AB, g_BA, d_B, name="GanAB")
 c_BA = CombineModel(g_BA, g_AB, d_A, name="GanBA")
 
 # # it's time to give them the superior knowledge.
-train(d_A, d_B, g_AB, g_BA, c_AB, c_BA, epochs=15, chunk=5)
+train(d_A, d_B, g_AB, g_BA, c_AB, c_BA, epochs=10, chunk=5)
 g_AB.save("GeneratorHtoZ.h5")
 g_BA.save("GeneratorZtoH.h5")
 
