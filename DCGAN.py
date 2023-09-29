@@ -17,7 +17,7 @@ from IPython import display
 
 ROOT = os.path.dirname(__file__)
 RESULTS = os.path.join(ROOT, "results")
-pdb.set_trace()
+
 # Load and prepare the dataset
 (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
 
@@ -189,6 +189,7 @@ def generate_and_save_images(model, epoch, test_input):
         plt.axis('off')
 
     plt.savefig(ROOT + '\\results\image_at_epoch_{:04d}.png'.format(epoch))
+    plt.close()
 
 
 # Train the model
