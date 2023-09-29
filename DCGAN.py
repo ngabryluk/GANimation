@@ -86,11 +86,11 @@ def make_discriminator_model():
 # Positive value for REAL
 # Negative value for FAKE
 discriminator = make_discriminator_model()
-decision = discriminator(generated_image)
-print("\n==================")
-print("DISCRIMINATOR TEST")
-print("==================\n")
-print (f'{decision}\n')
+# decision = discriminator(generated_image)
+# print("\n==================")
+# print("DISCRIMINATOR TEST")
+# print("==================\n")
+# print (f'{decision}\n')
 
 
 
@@ -122,10 +122,9 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
 
 # Define the training loop
 
-EPOCHS = 100
+EPOCHS = 1000
 noise_dim = 100
 num_examples_to_generate = 16
-total_time = 0
 
 # You will reuse this seed overtime (so it's easier)
 # to visualize progress in the animated GIF)
@@ -152,7 +151,7 @@ def train_step(images):
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
-def train(dataset, epochs):
+def train(dataset, epochs, total_time):
     for epoch in range(epochs):
         start = time.time()
 
@@ -178,6 +177,7 @@ def train(dataset, epochs):
     generate_and_save_images(generator,
                             epochs,
                             seed)
+    return total_time
 
 def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
@@ -195,9 +195,9 @@ def generate_and_save_images(model, epoch, test_input):
     plt.close()
 
 
-# Train the model
-train(train_dataset, EPOCHS)
-print(f'Total training time: {total_time / 60} mintues')
+# Train the model\
+total_time_for_training = train(train_dataset, EPOCHS, total_time = 0)
+print(f'Total training time: {total_time_for_training / 60} mintues')
 
 # # Restore latest checkpoint
 # checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
