@@ -122,9 +122,10 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
 
 # Define the training loop
 
-EPOCHS = 50
+EPOCHS = 100
 noise_dim = 100
 num_examples_to_generate = 16
+total_time = 0
 
 # You will reuse this seed overtime (so it's easier)
 # to visualize progress in the animated GIF)
@@ -168,7 +169,9 @@ def train(dataset, epochs):
         if (epoch + 1) % 15 == 0:
             checkpoint.save(file_prefix = checkpoint_prefix)
 
-        print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
+        timeForEpoch = time.time()-start
+        total_time += timeForEpoch
+        print ('Time for epoch {} is {} sec'.format(epoch + 1, timeForEpoch))
 
     # Generate after the final epoch
     display.clear_output(wait=True)
@@ -194,6 +197,7 @@ def generate_and_save_images(model, epoch, test_input):
 
 # Train the model
 train(train_dataset, EPOCHS)
+print(f'Total training time: {total_time / 60} mintues')
 
 # # Restore latest checkpoint
 # checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
