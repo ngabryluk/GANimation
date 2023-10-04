@@ -1,0 +1,9 @@
+imageio==2.31.5
+ipython==8.15.0
+keras==2.13.1
+matplotlib==3.8.0
+numpy==1.24.3
+Pillow==10.0.1
+Pillow==10.0.1
+tensorflow==2.13.0
+tensorflow_intel==2.13.0
