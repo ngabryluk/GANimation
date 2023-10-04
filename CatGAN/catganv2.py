@@ -15,7 +15,7 @@ ROOT = os.path.dirname(__file__)
 DATA_ROOT = f'{ROOT}/cats'
 # TODO: Probably need to change these two constants
 BUFFER_SIZE = 5500
-BATCH_SIZE = 256
+BATCH_SIZE = 4
 HEIGHT = 512
 WIDTH = 512
 TRAINING_DIST = 0.3
@@ -207,10 +207,10 @@ def main():
 
     # Normalize the images to [-1, 1]
     # TODO: See if I need to do this
-    # print("Normalizing images...")
-    # train_images = (train_images - 127.5) / 127.5
-    # test_images = (test_images - 127.5) / 127.5
-    # print("Images normalized.")
+    print("Normalizing images...")
+    train_images = (train_images - 127.5) / 127.5
+    test_images = (test_images - 127.5) / 127.5
+    print("Images normalized.")
 
     # Batch and shuffle the data
     # TODO: See if I need to do this for the test images too
