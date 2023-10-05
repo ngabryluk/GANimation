@@ -73,25 +73,25 @@ class Generator(Model):
     def make_model(self):
         # WTF is up with 100!?!?
         self.model.add(layers.Dense((HEIGHT // 4) * (WIDTH // 4)
-                       * BATCH_SIZE, use_bias=False, input_shape=(100,)))
+                       * BATCH_SIZE, use_bias=True, input_shape=(100,)))
         self.model.add(layers.BatchNormalization())
-        self.model.add(layers.LeakyReLU())
+        self.model.add(layers.ReLU())
         self.model.add(layers.Reshape((HEIGHT // 4, WIDTH // 4, BATCH_SIZE)))
         # Note: None is the batch size
         assert self.model.output_shape == (
             None, HEIGHT // 4, WIDTH // 4, BATCH_SIZE)
         self.model.add(layers.Conv2DTranspose(BATCH_SIZE // 2,
-                       self.kernel, strides=(1, 1), padding='same', use_bias=False))
+                       self.kernel, self.stride, padding='same', use_bias=False))
         assert self.model.output_shape == (
             None, HEIGHT // 4, WIDTH // 4, BATCH_SIZE // 2)
         self.model.add(layers.BatchNormalization())
-        self.model.add(layers.LeakyReLU())
+        self.model.add(layers.ReLU())
         self.model.add(layers.Conv2DTranspose(BATCH_SIZE // 4,
                        self.kernel, self.stride, padding='same', use_bias=False))
         assert self.model.output_shape == (
             None, HEIGHT // 2, WIDTH // 2, BATCH_SIZE // 4)
         self.model.add(layers.BatchNormalization())
-        self.model.add(layers.LeakyReLU())
+        self.model.add(layers.ReLU())
         self.model.add(layers.Conv2DTranspose(
             3, self.kernel, self.stride, padding='same', use_bias=False, activation='tanh'))
         assert self.model.output_shape == (None, HEIGHT, WIDTH, 3)
@@ -129,13 +129,14 @@ def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
     # This is so all layers run in inference mode (batchnorm).
     predictions = model(test_input, training=False)
-
+    
     fig = plt.figure(figsize=(4, 4))
 
     for i in range(predictions.shape[0]):
         plt.subplot(4, 4, i+1)
-        plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
+        plt.imshow(predictions[i, :, :, :] / 255) #  * 127.5 + 127.5
         plt.axis('off')
+        # pdb.set_trace()
 
     plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
     plt.show()
@@ -152,6 +153,7 @@ def train_step(images, generator: Generator, discriminator: Discriminator):
         generated_images = gen_model(noise, training=True)
         real_output = disc_model(images, training=True)
         fake_output = disc_model(generated_images, training=True)
+        # pdb.set_trace()
         gen_loss = generator.loss(fake_output)
         disc_loss = discriminator.loss(real_output, fake_output)
     gradients_of_generator = gen_tape.gradient(
@@ -205,12 +207,12 @@ def main():
         Image.open(file)) for file in glob.glob(f'{DATA_ROOT}/test/*.jpg')])
     print(f'Testing images loaded in {time.time() - start} seconds.\n')
 
-    # Normalize the images to [-1, 1]
+    # Normalize the images to [0, 1]
     # TODO: See if I need to do this
-    print("Normalizing images...")
-    train_images = (train_images - 127.5) / 127.5
-    test_images = (test_images - 127.5) / 127.5
-    print("Images normalized.")
+    # print("Normalizing images...")
+    # train_images = train_images / 255
+    # test_images = test_images / 255
+    # print("Images normalized.")
 
     # Batch and shuffle the data
     # TODO: See if I need to do this for the test images too
@@ -224,9 +226,11 @@ def main():
     # Testing the generator
     generator = Generator()
     generator_model = generator.make_model()
-    noise = tf.random.normal([1, 100])
+    noise = tf.random.uniform([1, 100], 0, 1)
     generated_image = generator_model(noise, training=False)
-    plt.imshow(generated_image[0, :, :, :], cmap='brg')
+    plt.imshow(generated_image[0, :, :, :])
+    plt.show()
+    pdb.set_trace()
     discriminator = Discriminator()
     discriminator_mdoel = discriminator.make_model()
     decision = discriminator_mdoel(generated_image)
