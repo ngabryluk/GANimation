@@ -15,7 +15,7 @@ ROOT = os.path.dirname(__file__)
 DATA_ROOT = f'{ROOT}/cats'
 # TODO: Probably need to change these two constants
 BUFFER_SIZE = 5500
-BATCH_SIZE = 4
+BATCH_SIZE = 1
 HEIGHT = 512
 WIDTH = 512
 TRAINING_DIST = 0.3
@@ -65,35 +65,64 @@ class Model:
 
 
 class Generator(Model):
-    def __init__(self, k=(5, 5), s=(2, 2)):
+    def __init__(self, k=(4, 4), s=(2, 2)):
         super().__init__(k, s)
 
     # TODO: Probably extract most of these numbers to the class, so they can be specified upon creation
     # TODO: Work through this, figure out what everything does, and comment it
     def make_model(self):
-        # WTF is up with 100!?!?
-        self.model.add(layers.Dense((HEIGHT // 4) * (WIDTH // 4)
-                       * BATCH_SIZE, use_bias=True, input_shape=(100,)))
+        # Reshape in 1D space
+        self.model.add(layers.Dense((HEIGHT // 64) * (WIDTH // 64)
+                       * 32768, use_bias=False, input_shape=(100,)))
         self.model.add(layers.BatchNormalization())
         self.model.add(layers.ReLU())
-        self.model.add(layers.Reshape((HEIGHT // 4, WIDTH // 4, BATCH_SIZE)))
-        # Note: None is the batch size
+        self.model.add(layers.Reshape((HEIGHT // 64, WIDTH // 64, 32768)))
         assert self.model.output_shape == (
-            None, HEIGHT // 4, WIDTH // 4, BATCH_SIZE)
-        self.model.add(layers.Conv2DTranspose(BATCH_SIZE // 2,
+            None, HEIGHT // 64, WIDTH // 64, 32768)
+        # Reshape into 3D space
+        self.model.add(layers.Conv2DTranspose(16384,
+                       self.kernel, strides=(1, 1), padding='same', use_bias=False))
+        assert self.model.output_shape == (
+            None, HEIGHT // 32, WIDTH // 32, BATCH_SIZE // 16384)
+        self.model.add(layers.BatchNormalization())
+        self.model.add(layers.ReLU())
+        # Upsample
+        self.model.add(layers.Conv2DTranspose(8192,
                        self.kernel, self.stride, padding='same', use_bias=False))
         assert self.model.output_shape == (
-            None, HEIGHT // 4, WIDTH // 4, BATCH_SIZE // 2)
+            None, HEIGHT // 16, WIDTH // 16, 8192)
         self.model.add(layers.BatchNormalization())
         self.model.add(layers.ReLU())
-        self.model.add(layers.Conv2DTranspose(BATCH_SIZE // 4,
+        # Upsample
+        self.model.add(layers.Conv2DTranspose(4096,
                        self.kernel, self.stride, padding='same', use_bias=False))
         assert self.model.output_shape == (
-            None, HEIGHT // 2, WIDTH // 2, BATCH_SIZE // 4)
+            None, HEIGHT // 8, WIDTH // 8, 4096)
         self.model.add(layers.BatchNormalization())
         self.model.add(layers.ReLU())
-        self.model.add(layers.Conv2DTranspose(
-            3, self.kernel, self.stride, padding='same', use_bias=False, activation='tanh'))
+        # Upsample
+        self.model.add(layers.Conv2DTranspose(2048,
+                       self.kernel, self.stride, padding='same', use_bias=False))
+        assert self.model.output_shape == (
+            None, HEIGHT // 4, WIDTH // 4, 2048)
+        self.model.add(layers.BatchNormalization())
+        self.model.add(layers.ReLU())
+        # Upsample
+        self.model.add(layers.Conv2DTranspose(1024,
+                       self.kernel, self.stride, padding='same', use_bias=False))
+        assert self.model.output_shape == (
+            None, HEIGHT // 2, WIDTH // 2, 1024)
+        self.model.add(layers.BatchNormalization())
+        self.model.add(layers.ReLU())
+        # Upsample
+        self.model.add(layers.Conv2DTranspose(512,
+                       self.kernel, self.stride, padding='same', use_bias=False))
+        assert self.model.output_shape == (
+            None, HEIGHT, WIDTH, 512)
+        self.model.add(layers.BatchNormalization())
+        self.model.add(layers.ReLU())
+        # Upsample
+        self.model.add(layers.Conv2D(3, self.kernel, padding="same", activation="tanh"))
         assert self.model.output_shape == (None, HEIGHT, WIDTH, 3)
         return self.model
 
@@ -102,20 +131,44 @@ class Generator(Model):
 
 
 class Discriminator(Model):
-    def __init__(self, k=(5, 5), s=(2, 2)):
+    def __init__(self, k=(4, 4), s=(2, 2)):
         super().__init__(k, s)
 
     def make_model(self):
-        self.model.add(layers.Conv2D(BATCH_SIZE // 4, self.kernel,
+        # Downsample
+        self.model.add(layers.Conv2D(16384, self.kernel,
                        strides=self.stride, padding='same', input_shape=[HEIGHT, WIDTH, 3]))
         self.model.add(layers.LeakyReLU())
-        self.model.add(layers.Dropout(0.3))
-        self.model.add(layers.Conv2D(BATCH_SIZE // 2, self.kernel,
+        self.model.add(layers.BatchNormalization())
+        # Downsample
+        self.model.add(layers.Conv2D(8192, self.kernel,
                        strides=self.stride, padding='same'))
         self.model.add(layers.LeakyReLU())
-        self.model.add(layers.Dropout(0.3))
+        self.model.add(layers.BatchNormalization())
+        # Downsample
+        self.model.add(layers.Conv2D(4096, self.kernel,
+                       strides=self.stride, padding='same'))
+        self.model.add(layers.LeakyReLU())
+        self.model.add(layers.BatchNormalization())
+        # Downsample
+        self.model.add(layers.Conv2D(2048, self.kernel,
+                       strides=self.stride, padding='same'))
+        self.model.add(layers.LeakyReLU())
+        self.model.add(layers.BatchNormalization())
+        # Downsample
+        self.model.add(layers.Conv2D(1024, self.kernel,
+                       strides=self.stride, padding='same'))
+        self.model.add(layers.LeakyReLU())
+        self.model.add(layers.BatchNormalization())
+        # Downsample
+        self.model.add(layers.Conv2D(512, self.kernel,
+                       strides=self.stride, padding='same'))
+        self.model.add(layers.LeakyReLU())
+        # Flatten and dropout
         self.model.add(layers.Flatten())
-        self.model.add(layers.Dense(1))
+        self.model.add(layers.Dropout(0.3))
+        # Binary classification layer
+        self.model.add(layers.Dense(1, activation="sigmoid"))
         return self.model
 
     def loss(self, real_output, fake_output):
@@ -190,38 +243,38 @@ def main():
     # Load the images
     start = time.time()
     print("Loading training images...")
-    train_images = []
-    if LIGHT_MODE:
-        for file in glob.glob(f'{DATA_ROOT}/train/*.jpg'):
-            if (np.random.random() < TRAINING_DIST):
-                train_images.append(
-                    tf.keras.preprocessing.image.img_to_array(Image.open(file)))
-        train_images = np.array(train_images)
-    else:
-        train_images = np.array([tf.keras.preprocessing.image.img_to_array(
-            Image.open(file)) for file in glob.glob(f'{DATA_ROOT}/train/*.jpg')])
+    # train_images = []
+    # if LIGHT_MODE:
+    #     for file in glob.glob(f'{DATA_ROOT}/train/*.jpg'):
+    #         if (np.random.random() < TRAINING_DIST):
+    #             train_images.append(
+    #                 tf.keras.preprocessing.image.img_to_array(Image.open(file)))
+    #     train_images = np.array(train_images)
+    # else:
+    #     train_images = np.array([tf.keras.preprocessing.image.img_to_array(
+    #         Image.open(file)) for file in glob.glob(f'{DATA_ROOT}/train/*.jpg')])
+    train_images = tf.keras.utils.image_dataset_from_directory(f'{DATA_ROOT}/train', label_mode=None, image_size=(HEIGHT, WIDTH), batch_size=BATCH_SIZE, shuffle=True)
     print(f'Training images loaded in {time.time() - start} seconds.\n')
     start = time.time()
     print("Loading testing images...")
-    test_images = np.array([tf.keras.preprocessing.image.img_to_array(
-        Image.open(file)) for file in glob.glob(f'{DATA_ROOT}/test/*.jpg')])
+    # test_images = np.array([tf.keras.preprocessing.image.img_to_array(
+    #     Image.open(file)) for file in glob.glob(f'{DATA_ROOT}/test/*.jpg')])
+    test_images = tf.keras.utils.image_dataset_from_directory(f'{DATA_ROOT}/test', label_mode=None, image_size=(HEIGHT, WIDTH), batch_size=BATCH_SIZE, shuffle=True)
     print(f'Testing images loaded in {time.time() - start} seconds.\n')
 
     # Normalize the images to [0, 1]
     # TODO: See if I need to do this
-    # print("Normalizing images...")
-    # train_images = train_images / 255
-    # test_images = test_images / 255
-    # print("Images normalized.")
+    print("Normalizing images...")
+    train_dataset = train_images.map(lambda x: (x - 127.5) / 127.5)
+    test_dataset = test_images.map(lambda x: (x - 127.5) / 127.5)
+    print("Images normalized.")
 
     # Batch and shuffle the data
     # TODO: See if I need to do this for the test images too
-    print("Batching and shuffling data...")
-    train_dataset = tf.data.Dataset.from_tensor_slices(
-        train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_tensor_slices(
-        test_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
-    print("Data successfully batched and shuffled.")
+    # print("Batching and shuffling data...")
+    # train_dataset = train_dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+    # test_dataset = train_dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+    # print("Data successfully batched and shuffled.")
 
     # Testing the generator
     generator = Generator()
