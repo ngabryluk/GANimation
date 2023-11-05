@@ -5,10 +5,10 @@ import matplotlib.animation as animation
 fig, ax = plt.subplots()
 ax.axis('off')
 
-# Define the initial position of the shape
+# Define the initial position of the shapes
 x0, y0 = 0.1, 0.5
 radius = 0.05  # Radius of the circle
-height, width = 0.3, 0.2
+height, width = 0.3, 0.2 # Height and width of the rectangle
 
 # Create the circle patch
 circle = plt.Circle((x0, y0), radius, fc='black')
