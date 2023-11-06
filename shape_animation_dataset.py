@@ -7,6 +7,7 @@
 #       - right to left
 #       - top to bottom
 #       - bottom to top
+#       - diagonal (4 directions)
 #   - Shapes
 #       - Circle
 #       - Rectangle
@@ -15,55 +16,84 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
+import os
+import pdb
+
+DATA = os.path.expanduser(os.path.join(os.getcwd(), "GANimation\\shape_data"))
 
 # Create a figure and axis with no axis labels or ticks and a black background
 fig, ax = plt.subplots()
-# ax.axis('off')
-# fig.set_facecolor("black")
-# ax.set_facecolor("black")
-
-# List of shapes to randomize
-shapes = ['circle', 'rectangle', 'triangle']
-
-# Pick a random shape
-shape = shapes[random.randint(0, len(shapes) - 2)]
-
-radius = 0.1  # Radius of the circle
-width, height = 0.3, 0.2 # Height and width of the rectangle
+ax.axis('off')
+fig.set_facecolor("black")
+ax.set_facecolor("black")
 
 # Define the initial position of the shapes randomly based on shape and so that it stays in bounds
-x0, y0 = 0, 0
-if shape == 'circle':
-    x0, y0 = random.random() * (1 - (radius * 2)) + 1, random.random() * (1 - (radius * 2))
-elif shape == 'rectangle':
-    x0, y0 = random.random() * (1 - width), random.random() * (1 - height)
-# elif shape == 'triangle':
-#     maxBase = 0.3
-#     pt1 = 
+# Circle
+radius = (random.random() * 0.1) + 0.05  # Radius of the circle (0.05 to 0.15)
+xmax = 0.36 # Farthest over on X-axis without going off the board
+x0, y0 = (random.random() * (xmax - radius)) + radius, random.random() * (1 - (radius * 2)) + radius
+
+# Rectangle
+width, height = 0.3, 0.2 # Height and width of the rectangle
+# x0, y0 = random.random() * (1 - width), random.random() * (1 - height)
+# x0, y0 = 0.36, 0.15
+# radius = 0.15
 
 # Create the circle patch
-circle = plt.Circle((x0, y0), radius, fc='black')
-rect = plt.Rectangle((x0, y0), width, height, fc='black')
-poly = plt.Polygon(([(0.1, 0.1), (0.9, 0.1), (0.5, 0.8)]), facecolor='red', edgecolor='black')
+patch = plt.Circle((x0, y0), radius, fc='white')
+# patch = plt.Rectangle((x0, y0), width, height, fc='black')
+# patch = plt.Polygon(([(0.1, 0.1), (0.9, 0.1), (0.5, 0.8)]), facecolor='red', edgecolor='black')
 
 # Add the shape to the axis
-if shape == 'circle':
-    ax.add_patch(circle)
-elif shape == 'rectangle':
-    ax.add_patch(rect)
-plt.show()
+ax.add_patch(patch)
 
 # Define the animation function to update the position of the circle
-def update(frame):
+def left2right(frame):
+    # Calculate the new position of the circle
+    x = x0 + frame * 0.01
+    y = y0
+
+    # Save the current frame
+    plt.savefig(f'{DATA}\\circle_right_{int(x*100)}_{int(y*100)}.jpg')
+    # plt.savefig(f'{DATA}\\rectangle_right_{x}_{y}.jpg')
+
+    # Update the position of the circle patch
+    patch.set_center((x, y))
+    # patch.set_xy((x, y)) # Rectangle
+
+def right2left(frame):
+    # Calculate the new position of the circle
+    x = x0 - frame * 0.01
+    y = y0
+
+    # Update the position of the circle patch
+    patch.set_xy((x, y))
+
+def top2bottom(frame):
     # Calculate the new position of the circle
     x = x0 + frame * 0.01
     y = y0
 
     # Update the position of the circle patch
-    poly.set_xy((x, y))
+    patch.set_xy((x, y))
 
-# Create an animation object
-ani = animation.FuncAnimation(fig, update, frames=50, interval=50, repeat=False, blit=False)
+def bottom2top(frame):
+    # Calculate the new position of the circle
+    x = x0 + frame * 0.01
+    y = y0
+
+    # Update the position of the circle patch
+    patch.set_xy((x, y))
+
+
+# Create animation objects
+moveright = animation.FuncAnimation(fig, left2right, frames=50, interval=50, repeat=False, blit=False)
+# moveleft = animation.FuncAnimation(fig, right2left, frames=50, interval=50, repeat=False, blit=False)
+# movedown = animation.FuncAnimation(fig, top2bottom, frames=50, interval=50, repeat=False, blit=False)
+# moveup = animation.FuncAnimation(fig, bottom2top, frames=50, interval=50, repeat=False, blit=False)
+
+# Save the animation as an mp4
+moveright.save(f'{DATA}\\circle_right_anim.gif', fps=25)
 
 # Display the animation
-plt.show()
+# plt.show()
