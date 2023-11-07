@@ -30,7 +30,7 @@ def left2right(frame):
     y = y0
 
     # Save the current frame
-    plt.savefig(f'{DATA}\\circle_right_{i}\\circle_right_{int(x*100)}_{int(y*100)}.jpg')
+    plt.savefig(f'{DATA}\\circle_right_{i+1}\\circle_right_{int(x*100)}_{int(y*100)}.jpg')
     # plt.savefig(f'{DATA}\\rectangle_right_{x}_{y}.jpg')
 
     # Update the position of the circle patch
@@ -61,7 +61,7 @@ def bottom2top(frame):
     # Update the position of the circle patch
     patch.set_xy((x, y))
 
-while i < 2:
+while i < 100:
     # Create a figure and axis with no axis labels or ticks and a black background
     fig, ax = plt.subplots()
     ax.axis('off')
@@ -71,8 +71,8 @@ while i < 2:
     # Define the initial position of the shapes randomly based on shape and so that it stays in bounds
     # Circle
     radius = (random.random() * 0.1) + 0.05  # Radius of the circle (0.05 to 0.15)
-    xmaxright = 0.36 # Farthest over on X-axis without going off the board (right)
-    x0, y0 = (random.random() * (xmaxright - radius)) + radius, random.random() * (1 - (radius * 2)) + radius
+    circlemax = 0.36 # Farthest over circle can go (x or y) without going off the board from animation
+    x0, y0 = (random.random() * (circlemax - radius)) + radius, random.random() * (1 - (radius * 2)) + radius
 
     # Rectangle
     width, height = 0.3, 0.2 # Height and width of the rectangle
@@ -89,7 +89,7 @@ while i < 2:
     ax.add_patch(patch)
 
     # Add a folder for the current iteration in shape_data
-    results_dir = os.path.join(DATA, f'circle_right_{i}')
+    results_dir = os.path.join(DATA, f'circle_right_{i+1}')
     os.makedirs(results_dir)
 
     # Create animation objects
@@ -99,7 +99,7 @@ while i < 2:
     # moveup = animation.FuncAnimation(fig, bottom2top, frames=50, interval=50, repeat=False, blit=False)
 
     # Save the animation as an mp4
-    moveright.save(f'{DATA}\\circle_right_{i}\\circle_right_anim_{i}.gif', fps=25)
+    moveright.save(f'{DATA}\\circle_right_{i+1}\\circle_right_anim_{i+1}.gif', fps=25)
 
     i += 1
 
