@@ -22,6 +22,8 @@ class Model:
         self.kernel = k
         self.stride = s
         self.model_made = model.built
+        self.stride_dim = s[0]
+        self.kernel_dim = k[0]
 
     def summary(self):
         try:
