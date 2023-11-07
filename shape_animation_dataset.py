@@ -21,45 +21,58 @@ import pdb
 
 DATA = os.path.expanduser(os.path.join(os.getcwd(), "GANimation\\shape_data"))
 
+# os.makedirs(os.path.join(DATA, f'circle_right'))
+# os.makedirs(os.path.join(DATA, f'circle_left'))
+os.makedirs(os.path.join(DATA, f'circle_up'))
+# os.makedirs(os.path.join(DATA, f'circle_down'))
+
 i = 0
 
 # Define the animation function to update the position of the circle
-def left2right(frame):
+def right(frame):
     # Calculate the new position of the circle
     x = x0 + frame * 0.01
     y = y0
 
     # Save the current frame
-    plt.savefig(f'{DATA}\\circle_right_{i+1}\\circle_right_{int(x*100)}_{int(y*100)}.jpg')
+    plt.savefig(f'{DATA}\\circle_right_{i+1}\\circle_right_{i+1}_{frame}.jpg')
     # plt.savefig(f'{DATA}\\rectangle_right_{x}_{y}.jpg')
 
     # Update the position of the circle patch
     patch.set_center((x, y))
     # patch.set_xy((x, y)) # Rectangle
 
-def right2left(frame):
+def left(frame):
     # Calculate the new position of the circle
     x = x0 - frame * 0.01
     y = y0
 
-    # Update the position of the circle patch
-    patch.set_xy((x, y))
+    # Save the current frame
+    plt.savefig(f'{DATA}\\circle_left\\circle_left_{i+1}\\circle_left_{i+1}_{frame}.jpg')
+    # plt.savefig(f'{DATA}\\rectangle_right_{x}_{y}.jpg')
 
-def top2bottom(frame):
+    # Update the position of the circle patch
+    patch.set_center((x, y))
+
+def up(frame):
+    # Calculate the new position of the circle
+    x = x0 
+    y = y0 + frame * 0.01
+
+    # Save the current frame
+    plt.savefig(f'{DATA}\\circle_up\\circle_up_{i+1}\\circle_up_{i+1}_{frame}.jpg')
+    # plt.savefig(f'{DATA}\\rectangle_right_{x}_{y}.jpg')
+
+    # Update the position of the circle patch
+    patch.set_center((x, y))
+
+def down(frame):
     # Calculate the new position of the circle
     x = x0 + frame * 0.01
     y = y0
 
     # Update the position of the circle patch
-    patch.set_xy((x, y))
-
-def bottom2top(frame):
-    # Calculate the new position of the circle
-    x = x0 + frame * 0.01
-    y = y0
-
-    # Update the position of the circle patch
-    patch.set_xy((x, y))
+    patch.set_center((x, y))
 
 while i < 100:
     # Create a figure and axis with no axis labels or ticks and a black background
@@ -72,7 +85,15 @@ while i < 100:
     # Circle
     radius = (random.random() * 0.1) + 0.05  # Radius of the circle (0.05 to 0.15)
     circlemax = 0.36 # Farthest over circle can go (x or y) without going off the board from animation
-    x0, y0 = (random.random() * (circlemax - radius)) + radius, random.random() * (1 - (radius * 2)) + radius
+    
+    # Right
+    # x0, y0 = (random.random() * (circlemax - radius)) + radius, random.random() * (1 - (radius * 2)) + radius
+
+    # Left
+    # x0, y0 = 1 - ((random.random() * (circlemax - radius)) + radius), random.random() * (1 - (radius * 2)) + radius
+
+    # Up
+    x0, y0 = random.random() * (1 - (radius * 2)) + radius, (random.random() * (circlemax - radius)) + radius
 
     # Rectangle
     width, height = 0.3, 0.2 # Height and width of the rectangle
@@ -89,17 +110,21 @@ while i < 100:
     ax.add_patch(patch)
 
     # Add a folder for the current iteration in shape_data
-    results_dir = os.path.join(DATA, f'circle_right_{i+1}')
+    # results_dir = os.path.join(DATA, f'circle_right_{i+1}')
+    # results_dir = os.path.join(DATA, f'circle_left\\circle_left_{i+1}')
+    results_dir = os.path.join(DATA, f'circle_up\\circle_up_{i+1}')
     os.makedirs(results_dir)
 
     # Create animation objects
-    moveright = animation.FuncAnimation(fig, left2right, frames=50, interval=50, repeat=False, blit=False)
-    # moveleft = animation.FuncAnimation(fig, right2left, frames=50, interval=50, repeat=False, blit=False)
-    # movedown = animation.FuncAnimation(fig, top2bottom, frames=50, interval=50, repeat=False, blit=False)
-    # moveup = animation.FuncAnimation(fig, bottom2top, frames=50, interval=50, repeat=False, blit=False)
-
-    # Save the animation as an mp4
-    moveright.save(f'{DATA}\\circle_right_{i+1}\\circle_right_anim_{i+1}.gif', fps=25)
+    # moveright = animation.FuncAnimation(fig, right, frames=50, interval=50, repeat=False, blit=False)
+    # moveleft = animation.FuncAnimation(fig, left, frames=50, interval=50, repeat=False, blit=False)
+    moveup = animation.FuncAnimation(fig, up, frames=50, interval=50, repeat=False, blit=False)
+    # movedown = animation.FuncAnimation(fig, down, frames=50, interval=50, repeat=False, blit=False)
+    
+    # Save the animation as a gif
+    # moveright.save(f'{DATA}\\circle_right_{i+1}\\circle_right_anim_{i+1}.gif', fps=25)
+    # moveleft.save(f'{DATA}\\circle_left\\circle_left_{i+1}\\circle_left_anim_{i+1}.gif', fps=25)
+    moveup.save(f'{DATA}\\circle_up\\circle_up_{i+1}\\circle_up_anim_{i+1}.gif', fps=25)
 
     i += 1
 
