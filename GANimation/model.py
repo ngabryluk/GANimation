@@ -1,3 +1,8 @@
+import sys
+from os import path
+
+sys.path.append(path.abspath(path.dirname(__file__)))
+
 from typing import Tuple
 import keras
 from exceptions import *
@@ -5,11 +10,18 @@ from exceptions import *
 
 class Model:
     # Don't know what type hinting to put for the optimizer
-    def __init__(self, model: keras.Model | keras.Sequential = keras.Sequential(), optimizer=keras.optimizers.Adam(1e-4), k: Tuple[int, int] = (5, 5), s: Tuple[int, int] = (2, 2)):
+    def __init__(
+        self,
+        model: keras.Model | keras.Sequential = keras.Sequential(),
+        optimizer=keras.optimizers.Adam(1e-4),
+        k: Tuple[int, int] = (5, 5),
+        s: Tuple[int, int] = (2, 2),
+    ):
         self.model = model
         self.optimizer = optimizer
         self.kernel = k
         self.stride = s
+        self.model_made = model.built
 
     def summary(self):
         try:
@@ -48,7 +60,7 @@ class Model:
         try:
             assert self.is_unfrozen()
         except AssertionError:
-            raise FreezeException('frozen', 'freeze')
+            raise FreezeException("frozen", "freeze")
 
         for layer in self.model.layers:
             layer.trainable = False
@@ -62,7 +74,7 @@ class Model:
         try:
             assert self.is_frozen()
         except AssertionError:
-            raise FreezeException('unfrozen', 'unfreeze')
+            raise FreezeException("unfrozen", "unfreeze")
 
         for layer in self.model.layers:
             layer.trainable = True
@@ -71,7 +83,7 @@ class Model:
         return self.model
 
     def check_model_status(self) -> bool:
-        return self.model.built
+        return self.model.model_made
 
     # Don't know what type hinting to put for the optimizer
     def get_optimizer(self):
