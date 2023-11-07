@@ -21,31 +21,7 @@ import pdb
 
 DATA = os.path.expanduser(os.path.join(os.getcwd(), "GANimation\\shape_data"))
 
-# Create a figure and axis with no axis labels or ticks and a black background
-fig, ax = plt.subplots()
-ax.axis('off')
-fig.set_facecolor("black")
-ax.set_facecolor("black")
-
-# Define the initial position of the shapes randomly based on shape and so that it stays in bounds
-# Circle
-radius = (random.random() * 0.1) + 0.05  # Radius of the circle (0.05 to 0.15)
-xmax = 0.36 # Farthest over on X-axis without going off the board
-x0, y0 = (random.random() * (xmax - radius)) + radius, random.random() * (1 - (radius * 2)) + radius
-
-# Rectangle
-width, height = 0.3, 0.2 # Height and width of the rectangle
-# x0, y0 = random.random() * (1 - width), random.random() * (1 - height)
-# x0, y0 = 0.36, 0.15
-# radius = 0.15
-
-# Create the circle patch
-patch = plt.Circle((x0, y0), radius, fc='white')
-# patch = plt.Rectangle((x0, y0), width, height, fc='black')
-# patch = plt.Polygon(([(0.1, 0.1), (0.9, 0.1), (0.5, 0.8)]), facecolor='red', edgecolor='black')
-
-# Add the shape to the axis
-ax.add_patch(patch)
+i = 0
 
 # Define the animation function to update the position of the circle
 def left2right(frame):
@@ -54,7 +30,7 @@ def left2right(frame):
     y = y0
 
     # Save the current frame
-    plt.savefig(f'{DATA}\\circle_right_{int(x*100)}_{int(y*100)}.jpg')
+    plt.savefig(f'{DATA}\\circle_right_{i}\\circle_right_{int(x*100)}_{int(y*100)}.jpg')
     # plt.savefig(f'{DATA}\\rectangle_right_{x}_{y}.jpg')
 
     # Update the position of the circle patch
@@ -85,15 +61,46 @@ def bottom2top(frame):
     # Update the position of the circle patch
     patch.set_xy((x, y))
 
+while i < 2:
+    # Create a figure and axis with no axis labels or ticks and a black background
+    fig, ax = plt.subplots()
+    ax.axis('off')
+    fig.set_facecolor("black")
+    ax.set_facecolor("black")
 
-# Create animation objects
-moveright = animation.FuncAnimation(fig, left2right, frames=50, interval=50, repeat=False, blit=False)
-# moveleft = animation.FuncAnimation(fig, right2left, frames=50, interval=50, repeat=False, blit=False)
-# movedown = animation.FuncAnimation(fig, top2bottom, frames=50, interval=50, repeat=False, blit=False)
-# moveup = animation.FuncAnimation(fig, bottom2top, frames=50, interval=50, repeat=False, blit=False)
+    # Define the initial position of the shapes randomly based on shape and so that it stays in bounds
+    # Circle
+    radius = (random.random() * 0.1) + 0.05  # Radius of the circle (0.05 to 0.15)
+    xmaxright = 0.36 # Farthest over on X-axis without going off the board (right)
+    x0, y0 = (random.random() * (xmaxright - radius)) + radius, random.random() * (1 - (radius * 2)) + radius
 
-# Save the animation as an mp4
-moveright.save(f'{DATA}\\circle_right_anim.gif', fps=25)
+    # Rectangle
+    width, height = 0.3, 0.2 # Height and width of the rectangle
+    # x0, y0 = random.random() * (1 - width), random.random() * (1 - height)
+    # x0, y0 = 0.36, 0.15
+    # radius = 0.15
 
-# Display the animation
-# plt.show()
+    # Create the circle patch
+    patch = plt.Circle((x0, y0), radius, fc='white')
+    # patch = plt.Rectangle((x0, y0), width, height, fc='black')
+    # patch = plt.Polygon(([(0.1, 0.1), (0.9, 0.1), (0.5, 0.8)]), facecolor='red', edgecolor='black')
+
+    # Add the shape to the axis
+    ax.add_patch(patch)
+
+    # Add a folder for the current iteration in shape_data
+    results_dir = os.path.join(DATA, f'circle_right_{i}')
+    os.makedirs(results_dir)
+
+    # Create animation objects
+    moveright = animation.FuncAnimation(fig, left2right, frames=50, interval=50, repeat=False, blit=False)
+    # moveleft = animation.FuncAnimation(fig, right2left, frames=50, interval=50, repeat=False, blit=False)
+    # movedown = animation.FuncAnimation(fig, top2bottom, frames=50, interval=50, repeat=False, blit=False)
+    # moveup = animation.FuncAnimation(fig, bottom2top, frames=50, interval=50, repeat=False, blit=False)
+
+    # Save the animation as an mp4
+    moveright.save(f'{DATA}\\circle_right_{i}\\circle_right_anim_{i}.gif', fps=25)
+
+    i += 1
+
+    plt.close()
