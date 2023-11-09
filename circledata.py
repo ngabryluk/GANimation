@@ -32,29 +32,30 @@ def gaussianNoise():
     # Show the figure
     plt.show()
 
-def circles(direction, size, speed, noise, index=1):
+def circles(direction=0, size=0, speed=0, noise=0, index=1):
     
+    dpi = 142
+
     # Create a figure that's 256x256 pixels
-    fig = plt.figure(figsize=(256/80, 256/80))  # 80 DPI is the default DPI for Matplotlib
+    fig = plt.figure(figsize=(256/dpi, 256/dpi), dpi=dpi)
 
     # Create an axis with no axis labels or ticks
     ax = fig.add_subplot(111)
     # ax.axis('off')
 
     # Define the initial position of the shape
-    x0, y0 = 0.5, 0.5
-    radius = 0.05  # Radius of the circle
+    x0, y0 = 50, 50
+    radius = 50  # Radius of the circle
 
     # Create the circle patch
-    circle = plt.Circle((x0, y0), radius, fc='blue')
+    circle = plt.Circle((x0, y0), radius, fc='black')
 
     # Add the circle to the axis
     ax.add_patch(circle)
 
     ax.set_xlim(0, 256)
     ax.set_ylim(0, 256)
-    plt.show()
-
+    
     # Define the animation function to update the position of the circle randomly
     def update(frame):
         # Calculate a random direction for movement
@@ -69,11 +70,11 @@ def circles(direction, size, speed, noise, index=1):
         circle.set_center((x, y))
 
     # Create an animation object
-    ani = animation.FuncAnimation(fig, update, frames=100, repeat=False, blit=False)
+    # ani = animation.FuncAnimation(fig, update, frames=100, repeat=False, blit=False)
 
     # Display the animation
     plt.show()
 
 if __name__ == "__main__":
-    # circles()
-    gaussianNoise()
+    circles()
+    # gaussianNoise()
