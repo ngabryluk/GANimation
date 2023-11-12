@@ -9,6 +9,8 @@ from keras import layers
 from model import Model
 from math import floor
 import pdb
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class PrimaryGenerator(Model):
@@ -37,7 +39,7 @@ class PrimaryGenerator(Model):
                 input_shape=(100,),
             )
         )
-        print(self.model.output_shape)
+        # print(self.model.output_shape)
         # self.model.add(
         #     layers.Dense(
         #         int(height / scale)
@@ -54,7 +56,7 @@ class PrimaryGenerator(Model):
         self.model.add(
             layers.Reshape((int(height / scale), int(width / scale), (64 * scale)))
         )
-        print(self.model.output_shape)
+        # print(self.model.output_shape)
         # Note: None is the batch size
         # 7, 7, 256
         assert self.model.output_shape == (
@@ -73,7 +75,7 @@ class PrimaryGenerator(Model):
                 use_bias=False,
             )
         )
-        print(self.model.output_shape)
+        # print(self.model.output_shape)
         # 7, 7, 128
         assert self.model.output_shape == (
             None,
@@ -85,7 +87,7 @@ class PrimaryGenerator(Model):
         self.model.add(layers.LeakyReLU())
 
         for num in range(num_upsamples - 1, 0, -1):
-            print(self.model.output_shape)
+            # print(self.model.output_shape)
             self.model.add(
                 layers.Conv2DTranspose(
                     64 * pow(2, num - 1),
@@ -95,7 +97,7 @@ class PrimaryGenerator(Model):
                     use_bias=False,
                 )
             )
-            print(self.model.output_shape)
+            # print(self.model.output_shape)
             # 14, 14, 64
             assert self.model.output_shape == (
                 None,
@@ -113,7 +115,7 @@ class PrimaryGenerator(Model):
                 strides=self.stride,
                 padding="same",
                 use_bias=False,
-                activation="tanh",
+                activation="relu",
             )
         )
         # 28, 28, 1
@@ -123,8 +125,8 @@ class PrimaryGenerator(Model):
     def train(self):
         pass
 
-    def predict(self):
-        pass
+    def predict(self, input):
+        return self.model.predict(input)
 
 
 class RefinementGenerator(Model):
@@ -151,6 +153,10 @@ class RefinementGenerator(Model):
 if __name__ == "__main__":
     test = PrimaryGenerator()
     print("Test model assigned")
-    test.make_model((64, 64, 1))
+    test.make_model((256, 256, 1), 4)
     print("Test model made")
     test.summary()
+    print("Testing what the model outputs")
+    output = test.predict(np.random.random(size=(1, 100)))
+    print(output)
+    plt.imsave("test.png", output[0, :, :, 0])
