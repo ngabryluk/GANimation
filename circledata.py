@@ -12,7 +12,39 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+import argparse
 import random
+
+parser = argparse.ArgumentParser(description="Specify the parameters of the data being created.")
+parser.add_argument("-i", "--iterations", type=int, default=1,
+                    help="Set the number of animations that will be created."                    
+)
+parser.add_argument("Shape", choices=["circle", "rectangle", "triangle"], default=random.choice(["circle", "rectangle", "triangle"]),
+                    help="Pick the shape that will be used in creating data."
+)
+parser.add_argument("-r", "--radius", type=float, choices=np.arange(5, 40, 0.01), default=round(random.uniform(5, 40), 2),
+                    help="Set the radius of the circle (5.00-40.00 - 2 decimal places)."
+)
+parser.add_argument("-rw", "--rectwidth", type=float, choices=np.arange(10, 75, 0.01), default=round(random.uniform(10, 50), 2),
+                    help="Set the width of the rectangle (10.00-75.00 - 2 decimal places)."
+)
+parser.add_argument("-rh", "--rectheight", type=float, choices=np.arange(10, 75, 0.01), default=round(random.uniform(10, 50), 2),
+                    help="Set the height of the rectangle (10.00-75.00 - 2 decimal places)."
+)
+parser.add_argument("-b", "--base", type=float, choices=np.arange(10, 75, 0.01), default=round(random.uniform(10, 50), 2),
+                    help="Set the base of the triangle (10.00-75.00 - 2 decimal places)."
+)
+parser.add_argument("-th", "--triheight", type=float, choices=np.arange(10, 75, 0.01), default=round(random.uniform(10, 50), 2),
+                    help="Set the height of the triangle (10.00-75.00 - 2 decimal places)."
+)
+parser.add_argument("-d", "--direction", choices=["right", "left", "up", "down", "diagonal", "bouncy", "random"],
+                    default=random.choice(["right", "left", "up", "down", "diagonal", "bouncy", "random"]),
+                    help="Set the direction that the shape will move."
+)
+parser.add_argument("-s", "--speed", type=int, default=200,
+                    help="Set the speed of the animations. The parameter this will be plugged into is the amount of "
+                    "milliseconds of delay between frames, so the lower the number, the faster the animation will be."
+)
 
 def gaussianNoise():
     # Create the figure
@@ -32,7 +64,7 @@ def gaussianNoise():
     # Show the figure
     plt.show()
 
-def circles(direction=0, size=0, speed=0, noise=0, index=1):
+def circles(direction, size, speed):
     
     dpi = 142
 
@@ -76,5 +108,6 @@ def circles(direction=0, size=0, speed=0, noise=0, index=1):
     plt.show()
 
 if __name__ == "__main__":
+    if 
     circles()
     # gaussianNoise()
