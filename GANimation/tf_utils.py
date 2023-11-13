@@ -1,3 +1,8 @@
+import sys
+from os import path
+
+sys.path.append(path.abspath(path.dirname(__file__)))
+
 import tqdm
 import random
 import pathlib
@@ -8,6 +13,7 @@ import cv2
 import numpy as np
 import remotezip as rz
 import tensorflow as tf
+
 # Some modules to display an animation using imageio.
 import imageio
 from IPython import display
@@ -16,7 +22,7 @@ from tensorflow_docs.vis import embed
 
 
 def list_files_from_zip_url(zip_url):
-    """ List the files in each class of the dataset given a URL with the zip file.
+    """List the files in each class of the dataset given a URL with the zip file.
 
     Args:
         zip_url: A URL from which the files can be extracted from.
@@ -32,7 +38,7 @@ def list_files_from_zip_url(zip_url):
 
 
 def get_class(fname):
-    """ Retrieve the name of the class given a filename.
+    """Retrieve the name of the class given a filename.
 
     Args:
         fname: Name of the file in the UCF101 dataset.
@@ -40,17 +46,17 @@ def get_class(fname):
     Returns:
         Class that the file belongs to.
     """
-    return fname.split('_')[-3]
+    return fname.split("_")[-3]
 
 
 def get_files_per_class(files):
-    """ Retrieve the files that belong to each class.
+    """Retrieve the files that belong to each class.
 
     Args:
         files: List of files in the dataset.
 
     Returns:
-        Dictionary of class names (key) and files (values). 
+        Dictionary of class names (key) and files (values).
     """
     files_for_class = collections.defaultdict(list)
     for fname in files:
@@ -60,7 +66,7 @@ def get_files_per_class(files):
 
 
 def select_subset_of_classes(files_for_class, classes, files_per_class):
-    """ Create a dictionary with the class name and a subset of the files in that class.
+    """Create a dictionary with the class name and a subset of the files in that class.
 
     Args:
         files_for_class: Dictionary of class names (key) and files (values).
@@ -80,7 +86,7 @@ def select_subset_of_classes(files_for_class, classes, files_per_class):
 
 
 def download_from_zip(zip_url, to_dir, file_names):
-    """ Download the contents of the zip file from the zip URL.
+    """Download the contents of the zip file from the zip URL.
 
     Args:
         zip_url: A URL with a zip file containing data.
@@ -99,7 +105,7 @@ def download_from_zip(zip_url, to_dir, file_names):
 
 
 def split_class_lists(files_for_class, count):
-    """ Returns the list of files belonging to a subset of data as well as the remainder of
+    """Returns the list of files belonging to a subset of data as well as the remainder of
     files that need to be downloaded.
 
     Args:
@@ -118,13 +124,13 @@ def split_class_lists(files_for_class, count):
 
 
 def download_ucf_101_subset(zip_url, num_classes, splits, download_dir):
-    """ Download a subset of the UCF101 dataset and split them into various parts, such as
+    """Download a subset of the UCF101 dataset and split them into various parts, such as
     training, validation, and test.
 
     Args:
         zip_url: A URL with a ZIP file with the data.
         num_classes: Number of labels.
-        splits: Dictionary specifying the training, validation, test, etc. (key) division of data 
+        splits: Dictionary specifying the training, validation, test, etc. (key) division of data
                 (value is number of files per split).
         download_dir: Directory to download data to.
 
@@ -153,8 +159,7 @@ def download_ucf_101_subset(zip_url, num_classes, splits, download_dir):
     for split_name, split_count in splits.items():
         print(split_name, ":")
     split_dir = download_dir / split_name
-    split_files, files_for_class = split_class_lists(
-        files_for_class, split_count)
+    split_files, files_for_class = split_class_lists(files_for_class, split_count)
     download_from_zip(zip_url, split_dir, split_files)
     dirs[split_name] = split_dir
 
@@ -166,7 +171,7 @@ def format_frames(frame, output_size):
     Pad and resize an image from a video.
 
     Args:
-        frame: Image that needs to resized and padded. 
+        frame: Image that needs to resized and padded.
         output_size: Pixel size of the output frame image.
 
     Return:
@@ -224,5 +229,5 @@ def frames_from_video_file(video_path, n_frames, output_size=(224, 224), frame_s
 
 def to_gif(images):
     converted_images = np.clip(images * 255, 0, 255).astype(np.uint8)
-    imageio.mimsave('./animation.gif', converted_images, fps=10)
-    return embed.embed_file('./animation.gif')
+    imageio.mimsave("./animation.gif", converted_images, fps=10)
+    return embed.embed_file("./animation.gif")
