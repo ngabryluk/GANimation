@@ -17,6 +17,7 @@ import os
 import random
 import pdb
 
+# Path to store the results in
 ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
 parser = argparse.ArgumentParser(description="Specify the parameters of the data being created.")
@@ -44,9 +45,8 @@ parser.add_argument("-th", "--triheight", type=int, choices=range(10, 76), defau
 parser.add_argument("-d", "--direction", choices=["right", "left", "up", "down", "diagonal", "bouncy"], default=None,
                     help="Set the direction that the shape will move."
 )
-parser.add_argument("-s", "--speed", type=int, choices=range(40, 300), default=0,
-                    help="Set the speed of the animations. The parameter this will be plugged into is the amount of "
-                    "milliseconds of delay between frames, so the lower the number, the faster the animation will be."
+parser.add_argument("-s", "--speed", type=int, choices=np.arange(0.4, 2, 0.01), default=0,
+                    help="Set the speed of the animations. This is the value that x or y is increased by each frame."
 )
 
 def circle(direction, size, speed, iterations):
@@ -71,7 +71,7 @@ def circle(direction, size, speed, iterations):
         if randSize:
             size = random.randint(10, 77)
         if randSpeed:
-            speed = random.randint(40, 300)
+            speed = random.uniform(0.4, 2)
         
         # Create a figure that's 256x256 pixels
         dpi = 142
@@ -95,7 +95,7 @@ def circle(direction, size, speed, iterations):
         # Define the animation function to update the position of the patch
         def right(frame):
             # Calculate the new position of the patch
-            x = x0 + frame * 2
+            x = x0 + frame * speed
             y = y0
 
             # Save the current frame
@@ -106,7 +106,7 @@ def circle(direction, size, speed, iterations):
 
         def left(frame):
             # Calculate the new position of the circle
-            x = x0 - frame * 2
+            x = x0 - frame * speed
             y = y0
 
             # Save the current frame
@@ -118,7 +118,7 @@ def circle(direction, size, speed, iterations):
         def up(frame):
             # Calculate the new position of the circle
             x = x0 
-            y = y0 + frame * 2
+            y = y0 + frame * speed
 
             # Save the current frame
             # plt.savefig(f'{ROOT}\\c-r{radius}-u-{speed}-{frame:03}.jpg')
@@ -129,7 +129,7 @@ def circle(direction, size, speed, iterations):
         def down(frame):
             # Calculate the new position of the circle
             x = x0
-            y = y0 - frame * 2
+            y = y0 - frame * speed
 
             # Save the current frame
             # plt.savefig(f'{ROOT}\\c-r{radius}-dwn-{speed}-{frame:03}.jpg')
@@ -140,17 +140,17 @@ def circle(direction, size, speed, iterations):
         def diagonal(frame):
             # Update x and y based on the random diagonal direction picked
             if rand == 1:
-                x = x0 + frame * 2
-                y = y0 + frame * 2
+                x = x0 + frame * speed
+                y = y0 + frame * speed
             elif rand == 2:
-                x = x0 + frame * 2
-                y = y0 - frame * 2
+                x = x0 + frame * speed
+                y = y0 - frame * speed
             elif rand == 3:
-                x = x0 - frame * 2
-                y = y0 - frame * 2
+                x = x0 - frame * speed
+                y = y0 - frame * speed
             elif rand == 4:
-                x = x0 - frame * 2
-                y = y0 + frame * 2
+                x = x0 - frame * speed
+                y = y0 + frame * speed
 
             # Save the current frame
             # plt.savefig(f'{ROOT}\\c-r{radius}-diag-{speed}-{frame:03}.jpg')
@@ -169,10 +169,10 @@ def circle(direction, size, speed, iterations):
             ax.add_patch(circle)
 
             # Create the animation object
-            ani = animation.FuncAnimation(fig, right, interval=speed, frames=50, repeat=False, blit=False)
+            ani = animation.FuncAnimation(fig, right, interval=75, frames=50, repeat=False, blit=False)
 
             # Save the animation
-            ani.save(f'{ROOT}\\c-r{radius}-r-{speed}-{i:03}.gif')
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-r-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "left":
             # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
             x0, y0 = setposition(direction, radius, rand)
@@ -184,10 +184,10 @@ def circle(direction, size, speed, iterations):
             ax.add_patch(circle)
 
             # Create the animation object
-            ani = animation.FuncAnimation(fig, left, interval=speed, frames=50, repeat=False, blit=False)
+            ani = animation.FuncAnimation(fig, left, interval=75, frames=50, repeat=False, blit=False)
 
             # Save the animation
-            ani.save(f'{ROOT}\\c-r{radius}-l-{speed}-{i:03}.gif')
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-l-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "up":
             # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
             x0, y0 = setposition(direction, radius, rand)
@@ -199,10 +199,10 @@ def circle(direction, size, speed, iterations):
             ax.add_patch(circle)
 
             # Create the animation object
-            ani = animation.FuncAnimation(fig, up, interval=speed, frames=50, repeat=False, blit=False)
+            ani = animation.FuncAnimation(fig, up, interval=75, frames=50, repeat=False, blit=False)
 
             # Save the animation
-            ani.save(f'{ROOT}\\c-r{radius}-u-{speed}-{i:03}.gif')
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-u-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "down":
             # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
             x0, y0 = setposition(direction, radius, rand)
@@ -214,10 +214,10 @@ def circle(direction, size, speed, iterations):
             ax.add_patch(circle)
 
             # Create the animation object
-            ani = animation.FuncAnimation(fig, down, interval=speed, frames=50, repeat=False, blit=False)
+            ani = animation.FuncAnimation(fig, down, interval=75, frames=50, repeat=False, blit=False)
 
             # Save the animation
-            ani.save(f'{ROOT}\\c-r{radius}-dwn-{speed}-{i:03}.gif')
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "diagonal":
             # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
             x0, y0 = setposition(direction, radius, rand)
@@ -229,10 +229,10 @@ def circle(direction, size, speed, iterations):
             ax.add_patch(circle)
 
             # Create the animation object
-            ani = animation.FuncAnimation(fig, diagonal, interval=speed, frames=50, repeat=False, blit=False)
+            ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
 
             # Save the animation
-            ani.save(f'{ROOT}\\c-r{radius}-diag-{speed}-{i:03}.gif')
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{int((speed / 2) * 100)}.gif', fps=25)
 
         
         # Display the animation using plt.show() below
