@@ -92,6 +92,16 @@ def circle(direction, size, speed, iterations):
         # Randomly pick which diagonal direction to go (up and right, down and right, down and left, up and left) for the function
         rand = random.randint(1, 4)
 
+
+        # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
+        x0, y0 = setpositioncircle(direction, radius, rand)
+
+        # Create the circle patch
+        circle = plt.Circle((x0, y0), radius, fc='white')
+
+        # Add the circle to the axis
+        ax.add_patch(circle)
+        
         # Define the animation function to update the position of the patch
         def right(frame):
             # Calculate the new position of the patch
@@ -157,92 +167,31 @@ def circle(direction, size, speed, iterations):
 
             circle.set_center((x, y))
 
-        # Create an animation object based on the direction given in the argument
+        # Create the animation objects and save them
         if direction == "right":
-            # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
-            x0, y0 = setposition(direction, radius, rand)
-
-            # Create the circle patch
-            circle = plt.Circle((x0, y0), radius, fc='white')
-
-            # Add the circle to the axis
-            ax.add_patch(circle)
-
-            # Create the animation object
             ani = animation.FuncAnimation(fig, right, interval=75, frames=50, repeat=False, blit=False)
-
-            # Save the animation
             ani.save(f'{ROOT}\\{i:03}-c-r{radius}-r-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "left":
-            # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
-            x0, y0 = setposition(direction, radius, rand)
-
-            # Create the circle patch
-            circle = plt.Circle((x0, y0), radius, fc='white')
-
-            # Add the circle to the axis
-            ax.add_patch(circle)
-
-            # Create the animation object
             ani = animation.FuncAnimation(fig, left, interval=75, frames=50, repeat=False, blit=False)
-
-            # Save the animation
             ani.save(f'{ROOT}\\{i:03}-c-r{radius}-l-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "up":
-            # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
-            x0, y0 = setposition(direction, radius, rand)
-
-            # Create the circle patch
-            circle = plt.Circle((x0, y0), radius, fc='white')
-
-            # Add the circle to the axis
-            ax.add_patch(circle)
-
-            # Create the animation object
             ani = animation.FuncAnimation(fig, up, interval=75, frames=50, repeat=False, blit=False)
-
-            # Save the animation
             ani.save(f'{ROOT}\\{i:03}-c-r{radius}-u-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "down":
-            # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
-            x0, y0 = setposition(direction, radius, rand)
-
-            # Create the circle patch
-            circle = plt.Circle((x0, y0), radius, fc='white')
-
-            # Add the circle to the axis
-            ax.add_patch(circle)
-
-            # Create the animation object
             ani = animation.FuncAnimation(fig, down, interval=75, frames=50, repeat=False, blit=False)
-
-            # Save the animation
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{int((speed / 2) * 100)}.gif', fps=25)
+            # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{int((speed / 2) * 100)}.gif', fps=25)
         elif direction == "diagonal":
-            # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
-            x0, y0 = setposition(direction, radius, rand)
-
-            # Create the circle patch
-            circle = plt.Circle((x0, y0), radius, fc='white')
-
-            # Add the circle to the axis
-            ax.add_patch(circle)
-
-            # Create the animation object
             ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
-
-            # Save the animation
             ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{int((speed / 2) * 100)}.gif', fps=25)
 
-        
         # Display the animation using plt.show() below
-        # plt.show()
+        plt.show()
 
         plt.close()
 
         i += 1
 
-def setposition(direction, size, diagonalDirection):
+def setpositioncircle(direction, size, diagonalDirection):
     maxDistOver = 155 # Farthest over circle can go (x or y axis) without going off the board from the animation
     x, y = 0, 0 # Initialize x and y
 
@@ -266,6 +215,77 @@ def setposition(direction, size, diagonalDirection):
 
     return x, y
 
+def triangle(direction, base, height, speed, iterations):
+    # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
+    randDirection, randBase, randHeight, randSpeed = False, False, False, False
+
+    if direction is None:
+        randDirection = True
+    if base == 0:
+        randBase = True
+    if height == 0:
+        randHeight = True
+    if speed == 0:
+        randSpeed = True
+
+    i = 1
+
+    while i <= iterations:
+
+        # Set a random value for the parameters we want randomized for each animation
+        if randDirection:
+            direction = random.choice(["right", "left", "up", "down", "diagonal"])
+        if randBase:
+            base = random.randint(10, 77)
+        if randSpeed:
+            speed = random.uniform(0.4, 2)
+
+        # Create a figure that's 256x256 pixels
+        dpi = 142
+        fig = plt.figure(figsize=(256/dpi, 256/dpi), dpi=dpi)
+
+        # Create an axis with no axis labels or ticks and a black background
+        ax = fig.add_subplot(111)
+        ax.axis('off')
+        fig.set_facecolor("black")
+        ax.set_facecolor("black")
+
+
+def test():
+
+    # Create a figure and axis with no axis labels or ticks
+    fig, ax = plt.subplots()
+    # ax.axis('off')
+
+    x1, y1, x2, y2, x3, y3 = 0.8, 0.8, 1.0, 0.8, 0.9, 1.0
+    # Create the circle patch
+    triangle = plt.Polygon([(x1, y1), (x2, y2), (x3, y3)], fc='black')
+
+    # Add the circle to the axis
+    ax.add_patch(triangle)
+
+    # Define the animation function to update the position of the circle
+    def update(frame):
+        # Calculate the new position of the circle
+        x1delta = x1 - frame * 0.01
+        y1delta = y1
+
+        x2delta = x2 - frame * 0.01
+        y2delta = y2
+
+        x3delta = x3 - frame * 0.01
+        y3delta = y3
+
+        # Update the position of the circle patch
+        triangle.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
+
+    # Create an animation object
+    ani = animation.FuncAnimation(fig, update, frames=50, repeat=False, blit=False)
+
+    # Display the animation
+    plt.show()
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     
@@ -277,3 +297,7 @@ if __name__ == "__main__":
 
     if shape == "circle":
         circle(args.direction, args.radius, args.speed, args.iterations)
+    elif shape == "triangle":
+        triangle(args.direction, args.base, args.triheight, args.speed, args.iterations)
+    else:
+        test()
