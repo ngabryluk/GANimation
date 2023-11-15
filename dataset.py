@@ -45,56 +45,16 @@ parser.add_argument("-th", "--triheight", type=int, choices=range(10, 76), defau
 parser.add_argument("-d", "--direction", choices=["right", "left", "up", "down", "diagonal", "bouncy"], default=None,
                     help="Set the direction that the shape will move."
 )
-parser.add_argument("-s", "--speed", type=int, choices=np.arange(0.4, 2, 0.01), default=0,
-                    help="Set the speed of the animations. This is the value that x or y is increased by each frame."
+parser.add_argument("-s", "--speed", type=int, choices=range(20, 101), default=0,
+                    help="Set the speed of the animations. This is percentage of the maximum speed of 2 pixels per frame."
 )
 
-def circle(direction, size, speed, iterations):
-
-    # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
-    randDirection, randSize, randSpeed = False, False, False
-
-    if direction is None:
-        randDirection = True
-    if size == 0:
-        randSize = True
-    if speed == 0:
-        randSpeed = True
-
-    i = 1
-
-    while i <= iterations:
-
-        # Set a random value for the parameters we want randomized for each animation
-        if randDirection:
-            direction = random.choice(["right", "left", "up", "down", "diagonal"])
-        if randSize:
-            size = random.randint(10, 77)
-        if randSpeed:
-            speed = random.uniform(0.4, 2)
+def circle(direction, radius, speed, ind, diagonalDirection, fig, ax):
         
-        # Create a figure that's 256x256 pixels
-        dpi = 142
-        fig = plt.figure(figsize=(256/dpi, 256/dpi), dpi=dpi)
-
-        # Create an axis with no axis labels or ticks and a black background
-        ax = fig.add_subplot(111)
-        ax.axis('off')
-        fig.set_facecolor("black")
-        ax.set_facecolor("black")
-
-        # Set the plot axis to by 256 x 256 to match the pixels
-        ax.set_xlim(0, 256)
-        ax.set_ylim(0, 256)
-
-        radius = size  # Radius of the circle
-
-        # Randomly pick which diagonal direction to go (up and right, down and right, down and left, up and left) for the function
-        rand = random.randint(1, 4)
-
+        i = ind # This is the ith iteration of the program
 
         # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
-        x0, y0 = setpositioncircle(direction, radius, rand)
+        x0, y0 = setpositioncircle(direction, radius, diagonalDirection)
 
         # Create the circle patch
         circle = plt.Circle((x0, y0), radius, fc='white')
@@ -105,7 +65,7 @@ def circle(direction, size, speed, iterations):
         # Define the animation function to update the position of the patch
         def right(frame):
             # Calculate the new position of the patch
-            x = x0 + frame * speed
+            x = x0 + frame * ((speed / 100) * 2.0)
             y = y0
 
             # Save the current frame
@@ -116,7 +76,7 @@ def circle(direction, size, speed, iterations):
 
         def left(frame):
             # Calculate the new position of the circle
-            x = x0 - frame * speed
+            x = x0 - frame * ((speed / 100) * 2.0)
             y = y0
 
             # Save the current frame
@@ -128,7 +88,7 @@ def circle(direction, size, speed, iterations):
         def up(frame):
             # Calculate the new position of the circle
             x = x0 
-            y = y0 + frame * speed
+            y = y0 + frame * ((speed / 100) * 2.0)
 
             # Save the current frame
             # plt.savefig(f'{ROOT}\\c-r{radius}-u-{speed}-{frame:03}.jpg')
@@ -139,7 +99,7 @@ def circle(direction, size, speed, iterations):
         def down(frame):
             # Calculate the new position of the circle
             x = x0
-            y = y0 - frame * speed
+            y = y0 - frame * ((speed / 100) * 2.0)
 
             # Save the current frame
             # plt.savefig(f'{ROOT}\\c-r{radius}-dwn-{speed}-{frame:03}.jpg')
@@ -149,18 +109,18 @@ def circle(direction, size, speed, iterations):
         
         def diagonal(frame):
             # Update x and y based on the random diagonal direction picked
-            if rand == 1:
-                x = x0 + frame * speed
-                y = y0 + frame * speed
-            elif rand == 2:
-                x = x0 + frame * speed
-                y = y0 - frame * speed
-            elif rand == 3:
-                x = x0 - frame * speed
-                y = y0 - frame * speed
-            elif rand == 4:
-                x = x0 - frame * speed
-                y = y0 + frame * speed
+            if diagonalDirection == 1: # Up and right
+                x = x0 + frame * ((speed / 100) * 2.0)
+                y = y0 + frame * ((speed / 100) * 2.0)
+            elif diagonalDirection == 2: # Down and right
+                x = x0 + frame * ((speed / 100) * 2.0)
+                y = y0 - frame * ((speed / 100) * 2.0)
+            elif diagonalDirection == 3: # Down and left
+                x = x0 - frame * ((speed / 100) * 2.0)
+                y = y0 - frame * ((speed / 100) * 2.0)
+            elif diagonalDirection == 4: # Up and left
+                x = x0 - frame * ((speed / 100) * 2.0)
+                y = y0 + frame * ((speed / 100) * 2.0)
 
             # Save the current frame
             # plt.savefig(f'{ROOT}\\c-r{radius}-diag-{speed}-{frame:03}.jpg')
@@ -170,86 +130,221 @@ def circle(direction, size, speed, iterations):
         # Create the animation objects and save them
         if direction == "right":
             ani = animation.FuncAnimation(fig, right, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-r-{int((speed / 2) * 100)}.gif', fps=25)
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-r-{speed}.gif', fps=25)
         elif direction == "left":
             ani = animation.FuncAnimation(fig, left, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-l-{int((speed / 2) * 100)}.gif', fps=25)
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-l-{speed}.gif', fps=25)
         elif direction == "up":
             ani = animation.FuncAnimation(fig, up, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-u-{int((speed / 2) * 100)}.gif', fps=25)
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-u-{speed}.gif', fps=25)
         elif direction == "down":
             ani = animation.FuncAnimation(fig, down, interval=75, frames=50, repeat=False, blit=False)
-            # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{int((speed / 2) * 100)}.gif', fps=25)
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{speed}.gif', fps=25)
         elif direction == "diagonal":
             ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{int((speed / 2) * 100)}.gif', fps=25)
+            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{speed}.gif', fps=25)
 
         # Display the animation using plt.show() below
-        plt.show()
+        # plt.show()
 
         plt.close()
 
-        i += 1
-
-def setpositioncircle(direction, size, diagonalDirection):
-    maxDistOver = 155 # Farthest over circle can go (x or y axis) without going off the board from the animation
+def setpositioncircle(direction, radius, diagonalDirection):
+    maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
     x, y = 0, 0 # Initialize x and y
 
     if direction == "right":
-        x, y = round(random.uniform(size, maxDistOver - size), 2), round(random.uniform(size, 256 - size), 2)
+        x, y = round(random.uniform(radius, maxDistOver - radius), 2), round(random.uniform(radius, 256 - radius), 2)
     elif direction == "left":
-        x, y = round(random.uniform(256 - maxDistOver + size, 256 - size), 2), round(random.uniform(size, 256 - size), 2)
+        x, y = round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2), round(random.uniform(radius, 256 - radius), 2)
     elif direction == "up":
-        x, y = round(random.uniform(size, 256 - size), 2), round(random.uniform(size, maxDistOver - size), 2)
+        x, y = round(random.uniform(radius, 256 - radius), 2), round(random.uniform(radius, maxDistOver - radius), 2)
     elif direction == "down":
-        x, y = round(random.uniform(size, 256 - size), 2), round(random.uniform(256 - maxDistOver + size, 256 - size), 2)
+        x, y = round(random.uniform(radius, 256 - radius), 2), round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2)
     elif direction == "diagonal":
         if diagonalDirection == 1: # Up and right 
-            x, y = round(random.uniform(size, maxDistOver - size), 2), round(random.uniform(size, maxDistOver - size), 2)
+            x, y = round(random.uniform(radius, maxDistOver - radius), 2), round(random.uniform(radius, maxDistOver - radius), 2)
         elif diagonalDirection == 2: # Down and right
-            x, y = round(random.uniform(size, maxDistOver - size), 2), round(random.uniform(256 - maxDistOver + size, 256 - size), 2)
+            x, y = round(random.uniform(radius, maxDistOver - radius), 2), round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2)
         elif diagonalDirection == 3: # Down and left
-            x, y = round(random.uniform(256 - maxDistOver + size, 256 - size), 2), round(random.uniform(256 - maxDistOver + size, 256 - size), 2)
+            x, y = round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2), round(random.uniform(256 - maxDistOver + radius, 256 - size), 2)
         elif diagonalDirection == 4: # Up and left
-            x, y = round(random.uniform(256 - maxDistOver + size, 256 - size), 2), round(random.uniform(size, maxDistOver - size), 2)
+            x, y = round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2), round(random.uniform(radius, maxDistOver - radius), 2)
 
     return x, y
 
-def triangle(direction, base, height, speed, iterations):
-    # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
-    randDirection, randBase, randHeight, randSpeed = False, False, False, False
+def triangle(direction, base, height, speed, ind, diagonalDirection, fig, ax):
+    
+    i = ind # This is the ith iteration of the program
 
-    if direction is None:
-        randDirection = True
-    if base == 0:
-        randBase = True
-    if height == 0:
-        randHeight = True
-    if speed == 0:
-        randSpeed = True
+    # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
+    x1, y1, x2, y2, x3, y3 = setpositiontriangle(direction, base, height, diagonalDirection)
 
-    i = 1
+    # Create the triangle patch
+    tri = plt.Polygon([(x1, y1), (x2, y2), (x3, y3)], fc="white")
 
-    while i <= iterations:
+    # Add the triangle to the axis
+    ax.add_patch(tri)
 
-        # Set a random value for the parameters we want randomized for each animation
-        if randDirection:
-            direction = random.choice(["right", "left", "up", "down", "diagonal"])
-        if randBase:
-            base = random.randint(10, 77)
-        if randSpeed:
-            speed = random.uniform(0.4, 2)
+    def right(frame):
+        # Calculate the new position of the triangle
+        x1delta = x1 + frame * ((speed / 100) * 2.0)
+        y1delta = y1
 
-        # Create a figure that's 256x256 pixels
-        dpi = 142
-        fig = plt.figure(figsize=(256/dpi, 256/dpi), dpi=dpi)
+        x2delta = x2 + frame * ((speed / 100) * 2.0)
+        y2delta = y2
 
-        # Create an axis with no axis labels or ticks and a black background
-        ax = fig.add_subplot(111)
-        ax.axis('off')
-        fig.set_facecolor("black")
-        ax.set_facecolor("black")
+        x3delta = x3 + frame * ((speed / 100) * 2.0)
+        y3delta = y3
 
+        # Update the position of the triangle patch
+        tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
+
+    def left(frame):
+        # Calculate the new position of the triangle
+        x1delta = x1 - frame * ((speed / 100) * 2.0)
+        y1delta = y1
+
+        x2delta = x2 - frame * ((speed / 100) * 2.0)
+        y2delta = y2
+
+        x3delta = x3 - frame * ((speed / 100) * 2.0)
+        y3delta = y3
+
+        # Update the position of the triangle patch
+        tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
+
+    def up(frame):
+        # Calculate the new position of the triangle
+        x1delta = x1
+        y1delta = y1 + frame * ((speed / 100) * 2.0)
+
+        x2delta = x2
+        y2delta = y2 + frame * ((speed / 100) * 2.0)
+
+        x3delta = x3
+        y3delta = y3 + frame * ((speed / 100) * 2.0)
+
+        # Update the position of the triangle patch
+        tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
+
+    def down(frame):
+        # Calculate the new position of the triangle
+        x1delta = x1
+        y1delta = y1 - frame * ((speed / 100) * 2.0)
+
+        x2delta = x2
+        y2delta = y2 - frame * ((speed / 100) * 2.0)
+
+        x3delta = x3
+        y3delta = y3 - frame * ((speed / 100) * 2.0)
+
+        # Update the position of the triangle patch
+        tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
+
+    def diagonal(frame):
+        # Calculate the new position of the triangle
+        if diagonalDirection == 1: # Up and right
+            x1delta = x1 + frame * ((speed / 100) * 2.0)
+            y1delta = y1 + frame * ((speed / 100) * 2.0)
+
+            x2delta = x2 + frame * ((speed / 100) * 2.0)
+            y2delta = y2 + frame * ((speed / 100) * 2.0)
+
+            x3delta = x3 + frame * ((speed / 100) * 2.0)
+            y3delta = y3 + frame * ((speed / 100) * 2.0)
+        elif diagonalDirection == 2: # Down and right
+            x1delta = x1 + frame * ((speed / 100) * 2.0)
+            y1delta = y1 - frame * ((speed / 100) * 2.0)
+
+            x2delta = x2 + frame * ((speed / 100) * 2.0)
+            y2delta = y2 - frame * ((speed / 100) * 2.0)
+
+            x3delta = x3 + frame * ((speed / 100) * 2.0)
+            y3delta = y3 - frame * ((speed / 100) * 2.0)
+        elif diagonalDirection == 3: # Down and left
+            x1delta = x1 - frame * ((speed / 100) * 2.0)
+            y1delta = y1 - frame * ((speed / 100) * 2.0)
+
+            x2delta = x2 - frame * ((speed / 100) * 2.0)
+            y2delta = y2 - frame * ((speed / 100) * 2.0)
+
+            x3delta = x3 - frame * ((speed / 100) * 2.0)
+            y3delta = y3 - frame * ((speed / 100) * 2.0)
+        elif diagonalDirection == 4: # Up and left
+            x1delta = x1 - frame * ((speed / 100) * 2.0)
+            y1delta = y1 + frame * ((speed / 100) * 2.0)
+
+            x2delta = x2 - frame * ((speed / 100) * 2.0)
+            y2delta = y2 + frame * ((speed / 100) * 2.0)
+
+            x3delta = x3 - frame * ((speed / 100) * 2.0)
+            y3delta = y3 + frame * ((speed / 100) * 2.0)
+
+        # Update the position of the triangle patch
+        tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
+    
+    # Create the animation objects and save them
+    if direction == "right":
+        ani = animation.FuncAnimation(fig, right, interval=75, frames=50, repeat=False, blit=False)
+        ani.save(f'{ROOT}\\{i:03}-t-b{base}h{height}-r-{speed}.gif', fps=25)
+    elif direction == "left":
+        ani = animation.FuncAnimation(fig, left, interval=75, frames=50, repeat=False, blit=False)
+        ani.save(f'{ROOT}\\{i:03}-t-b{base}h{height}-l-{speed}.gif', fps=25)
+    elif direction == "up":
+        ani = animation.FuncAnimation(fig, up, interval=75, frames=50, repeat=False, blit=False)
+        ani.save(f'{ROOT}\\{i:03}-t-b{base}h{height}-u-{speed}.gif', fps=25)
+    elif direction == "down":
+        ani = animation.FuncAnimation(fig, down, interval=75, frames=50, repeat=False, blit=False)
+        ani.save(f'{ROOT}\\{i:03}-t-b{base}h{height}-dwn-{speed}.gif', fps=25)
+    elif direction == "diagonal":
+        ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
+        ani.save(f'{ROOT}\\{i:03}-t-b{base}h{height}-diag-{speed}.gif', fps=25)
+
+    # Display the animation using plt.show() below
+    # plt.show()
+
+    plt.close()
+
+def setpositiontriangle(direction, base, height, diagonalDirection):
+    maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
+    x, y = 0, 0 # Initialize x and y
+
+    if direction == 'right':
+        x1, y1 = round(random.uniform(0, maxDistOver - base), 2), round(random.uniform(0, 256 - height), 2)
+        x2, y2 = x1 + base, y1
+        x3, y3 = x1 + (base / 2), y2 + height
+    elif direction == 'left':
+        x2, y2 = round(random.uniform(256 - maxDistOver + base, 256), 2), round(random.uniform(0, 256 - height), 2)
+        x1, y1 = x2 - base, y2
+        x3, y3 = x1 + (base / 2), y2 + height
+    elif direction == 'up':
+        x1, y1 = round(random.uniform(0, 256 - base), 2), round(random.uniform(0, maxDistOver - height), 2)
+        x2, y2 = x1 + base, y1
+        x3, y3 = x1 + (base / 2), y2 + height
+    elif direction == 'down':
+        x1, y1 = round(random.uniform(0, 256 - base), 2), round(random.uniform(256 - maxDistOver, 256 - height), 2)
+        x2, y2 = x1 + base, y1
+        x3, y3 = x1 + (base / 2), y2 + height
+    elif direction == 'diagonal':
+        if diagonalDirection == 1:
+            x1, y1 = round(random.uniform(0, maxDistOver - base), 2), round(random.uniform(0, maxDistOver - height), 2)
+            x2, y2 = x1 + base, y1
+            x3, y3 = x1 + (base / 2), y2 + height
+        elif diagonalDirection == 2:
+            x1, y1 = round(random.uniform(0, maxDistOver - base), 2), round(random.uniform(256 - maxDistOver, 256 - height), 2)
+            x2, y2 = x1 + base, y1
+            x3, y3 = x1 + (base / 2), y2 + height
+        elif diagonalDirection == 3:
+            x2, y2 = round(random.uniform(256 - maxDistOver + base, 256), 2), round(random.uniform(256 - maxDistOver, 256 - height), 2)
+            x1, y1 = x2 - base, y2
+            x3, y3 = x1 + (base / 2), y2 + height
+        elif diagonalDirection == 4:
+            x2, y2 = round(random.uniform(256 - maxDistOver + base, 256), 2), round(random.uniform(0, maxDistOver - height), 2)
+            x1, y1 = x2 - base, y2
+            x3, y3 = x1 + (base / 2), y2 + height
+    
+    return x1, y1, x2, y2, x3, y3
 
 def test():
 
@@ -286,18 +381,71 @@ def test():
     plt.show()
 
 
-if __name__ == "__main__":
-    args = parser.parse_args()
-    
-    shape = None
-    if args.shape is None:
-        shape = random.choice(["circle", "rectangle", "triangle"])
-    else:
-        shape = args.shape
+def main(args):
+    for i in range(args.iterations):
+        # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
+        randDirection, randRadius, randBase, randTriangleHeight, randWidth, randRectangleHeight, randSpeed = False, False, False, False, False, False, False
 
-    if shape == "circle":
-        circle(args.direction, args.radius, args.speed, args.iterations)
-    elif shape == "triangle":
-        triangle(args.direction, args.base, args.triheight, args.speed, args.iterations)
-    else:
-        test()
+        if args.direction is None:
+            randDirection = True
+        if args.radius == 0:
+            randRadius = True
+        if args.base == 0:
+            randBase = True
+        if args.triheight == 0:
+            randTriangleHeight = True
+        if args.rectwidth == 0:
+            randWidth = True
+        if args.rectheight == 0:
+            randRectangleHeight = True
+        if args.speed == 0:
+            randSpeed = True
+
+        # Set a random value for the parameters we want randomized for each animation
+        if randDirection:
+            direction = random.choice(["right", "left", "up", "down", "diagonal"])
+        if randRadius:
+            radius = random.randint(10, 77)
+        if randBase:
+            base = random.randint(10, 75)
+        if randTriangleHeight:
+            triheight = random.randint(10, 75)
+        if randWidth:
+            rectWidth = random.randint(10, 75)
+        if randRectangleHeight:
+            rectHeight = random.randint(10, 75)
+        if randSpeed:
+            speed = random.randint(20, 100)
+        
+        # Create a figure that's 256x256 pixels
+        dpi = 142
+        fig = plt.figure(figsize=(256/dpi, 256/dpi), dpi=dpi)
+
+        # Create an axis with no axis labels or ticks and a black background
+        ax = fig.add_subplot(111)
+        ax.axis('off')
+        fig.set_facecolor("black")
+        ax.set_facecolor("black")
+
+        # Set the plot axis to by 256 x 256 to match the pixels
+        ax.set_xlim(0, 256)
+        ax.set_ylim(0, 256)
+
+        # Randomly pick which diagonal direction to go (up and right, down and right, down and left, up and left) for the function
+        diagonalDirection = random.randint(1, 4)
+
+        shape = None
+        if args.shape is None:
+            shape = random.choice(["circle", "rectangle", "triangle"])
+        else:
+            shape = args.shape
+
+        if shape == "circle":
+            circle(direction, radius, speed, i, diagonalDirection, fig, ax)
+        elif shape == "triangle":
+            triangle(direction, base, triheight, speed, i, diagonalDirection, fig, ax)
+
+if __name__ == "__main__":
+    main(parser.parse_args())
+
+    
