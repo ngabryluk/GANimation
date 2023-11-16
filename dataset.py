@@ -12,6 +12,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+import imageio
 import argparse
 import os
 import random
@@ -19,6 +20,7 @@ import pdb
 
 # Path to store the results in
 ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+TEST = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test")
 
 parser = argparse.ArgumentParser(description="Specify the parameters of the data being created.")
 parser.add_argument("-i", "--iterations", type=int, default=1,
@@ -48,8 +50,10 @@ parser.add_argument("-d", "--direction", choices=["right", "left", "up", "down",
 parser.add_argument("-s", "--speed", type=int, choices=range(20, 101), default=0,
                     help="Set the speed of the animations. This is percentage of the maximum speed of 2 pixels per frame."
 )
+parser.add_argument("-n", "--noise", type=int, choices=range(1, 101), default=0,
+                    help="Set the percentage of noise to be added to the image.")
 
-def circle(direction, radius, speed, ind, diagonalDirection, fig, ax):
+def circle(direction, radius, speed, ind, diagonalDirection, fig, ax, noise):
         
         i = ind # This is the ith iteration of the program
 
@@ -61,91 +65,67 @@ def circle(direction, radius, speed, ind, diagonalDirection, fig, ax):
 
         # Add the circle to the axis
         ax.add_patch(circle)
-        
-        # Define the animation function to update the position of the patch
-        def right(frame):
-            # Calculate the new position of the patch
-            x = x0 + frame * ((speed / 100) * 2.0)
-            y = y0
 
-            # Save the current frame
-            # plt.savefig(f'{ROOT}\\c-r{radius}-r-{speed}-{frame:03}.jpg')
+        # Need to add noise to the the whole figure
+        # It seems that the noise is being added behind the patch
 
-            # Update the position of the patch
-            circle.set_center((x, y))
+        # plt.savefig("fig.png")
+        # arr = plt.imread("fig.png")
 
-        def left(frame):
-            # Calculate the new position of the circle
-            x = x0 - frame * ((speed / 100) * 2.0)
-            y = y0
+        # pdb.set_trace()
 
-            # Save the current frame
-            # plt.savefig(f'{ROOT}\\c-r{radius}-l-{speed}-{frame:03}.jpg')
-
-            # Update the position of the circle patch
-            circle.set_center((x, y))
-
-        def up(frame):
-            # Calculate the new position of the circle
-            x = x0 
-            y = y0 + frame * ((speed / 100) * 2.0)
-
-            # Save the current frame
-            # plt.savefig(f'{ROOT}\\c-r{radius}-u-{speed}-{frame:03}.jpg')
-
-            # Update the position of the circle patch
-            circle.set_center((x, y))
-
-        def down(frame):
-            # Calculate the new position of the circle
-            x = x0
-            y = y0 - frame * ((speed / 100) * 2.0)
-
-            # Save the current frame
-            # plt.savefig(f'{ROOT}\\c-r{radius}-dwn-{speed}-{frame:03}.jpg')
-
-            # Update the position of the circle patch
-            circle.set_center((x, y))
-        
-        def diagonal(frame):
-            # Update x and y based on the random diagonal direction picked
-            if diagonalDirection == 1: # Up and right
-                x = x0 + frame * ((speed / 100) * 2.0)
-                y = y0 + frame * ((speed / 100) * 2.0)
-            elif diagonalDirection == 2: # Down and right
-                x = x0 + frame * ((speed / 100) * 2.0)
-                y = y0 - frame * ((speed / 100) * 2.0)
-            elif diagonalDirection == 3: # Down and left
-                x = x0 - frame * ((speed / 100) * 2.0)
-                y = y0 - frame * ((speed / 100) * 2.0)
-            elif diagonalDirection == 4: # Up and left
-                x = x0 - frame * ((speed / 100) * 2.0)
-                y = y0 + frame * ((speed / 100) * 2.0)
-
-            # Save the current frame
-            # plt.savefig(f'{ROOT}\\c-r{radius}-diag-{speed}-{frame:03}.jpg')
-
-            circle.set_center((x, y))
-
-        # Create the animation objects and save them
-        if direction == "right":
-            ani = animation.FuncAnimation(fig, right, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-r-{speed}.gif', fps=25)
-        elif direction == "left":
-            ani = animation.FuncAnimation(fig, left, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-l-{speed}.gif', fps=25)
-        elif direction == "up":
-            ani = animation.FuncAnimation(fig, up, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-u-{speed}.gif', fps=25)
-        elif direction == "down":
-            ani = animation.FuncAnimation(fig, down, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{speed}.gif', fps=25)
-        elif direction == "diagonal":
-            ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
-            ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{speed}.gif', fps=25)
-
-        # Display the animation using plt.show() below
+        # plt.imshow(arr, cmap="gray_r")
         # plt.show()
+
+        # # pdb.set_trace()
+
+        # if os.path.exists("fig.png"):
+        #     os.remove("fig.png")
+        # else:
+        #     print("The file does not exist")
+
+
+        # For 50 frames...
+        for j in range(50):
+            # Create the animation objects and save them
+            if direction == "right":
+                circleright(circle, speed, noise, x0, y0, radius, j + 1, i)
+                # ani = animation.FuncAnimation(fig, right, interval=75, frames=50, repeat=False, blit=False)
+                # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-r-{speed}.gif', fps=25)
+            elif direction == "left":
+                circleleft(speed, noise, x0, y0, radius, j + 1, i)
+                # ani = animation.FuncAnimation(fig, left, interval=75, frames=50, repeat=False, blit=False)
+                # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-l-{speed}.gif', fps=25)
+            elif direction == "up":
+                circleup(speed, noise, x0, y0, radius, j + 1, i)
+                # ani = animation.FuncAnimation(fig, up, interval=75, frames=50, repeat=False, blit=False)
+                # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-u-{speed}.gif', fps=25)
+            elif direction == "down":
+                circledown(speed, noise, x0, y0, radius, j + 1, i)
+                # ani = animation.FuncAnimation(fig, down, interval=75, frames=50, repeat=False, blit=False)
+                # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{speed}.gif', fps=25)
+            elif direction == "diagonal":
+                circlediagonal(speed, noise, x0, y0, radius, j + 1, i, diagonalDirection)
+                # ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
+                # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{speed}.gif', fps=25)
+
+        ####################################
+        # Add noise to images if specified #
+        ####################################
+
+        if noise > 0:
+            # Get a list of the files in the folder where we saved the frames of the animation
+            img_list = os.listdir(TEST)
+
+            for img in img_list:
+                # Read the image as a numpy array
+                img_arr = imageio.imread(img)
+                img_arr = np.array(img_arr)
+
+                # Add noise to this 
+                img_arr += generate_noisy_matrix(256, noise)
+                plt.imshow(img_arr, cmap="gray_r")
+                plt.savefig(os.path.join(TEST, img))
 
         plt.close()
 
@@ -167,13 +147,78 @@ def setpositioncircle(direction, radius, diagonalDirection):
         elif diagonalDirection == 2: # Down and right
             x, y = round(random.uniform(radius, maxDistOver - radius), 2), round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2)
         elif diagonalDirection == 3: # Down and left
-            x, y = round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2), round(random.uniform(256 - maxDistOver + radius, 256 - size), 2)
+            x, y = round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2), round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2)
         elif diagonalDirection == 4: # Up and left
             x, y = round(random.uniform(256 - maxDistOver + radius, 256 - radius), 2), round(random.uniform(radius, maxDistOver - radius), 2)
 
     return x, y
 
-def triangle(direction, base, height, speed, ind, diagonalDirection, fig, ax):
+# Define the animation function to update the position of the patch
+def circleright(circle, speed, noise, x0, y0, radius, frame, iteration):
+    # Calculate the new position of the patch
+    x = x0 + ((speed / 100) * 2.0)
+    y = y0
+
+    # Save the current frame
+    plt.savefig(f'{TEST}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
+
+    # Update the position of the patch
+    circle.set_center((x, y))
+
+def circleleft(speed, x0, y0, radius, frame):
+    # Calculate the new position of the circle
+    x = x0 - ((speed / 100) * 2.0)
+    y = y0
+
+    # Save the current frame
+    # plt.savefig(f'{ROOT}\\{iteration:03}-c-r{radius}-l-{speed}-{frame:02}.jpg')
+
+    # Update the position of the circle patch
+    circle.set_center((x, y))
+
+def circleup(speed, x0, y0, radius, frame):
+    # Calculate the new position of the circle
+    x = x0 
+    y = y0 + ((speed / 100) * 2.0)
+
+    # Save the current frame
+    # plt.savefig(f'{ROOT}\\{iteration:03}-c-r{radius}-u-{speed}-{frame:02}.jpg')
+
+    # Update the position of the circle patch
+    circle.set_center((x, y))
+
+def circledown(speed, x0, y0, radius, frame):
+    # Calculate the new position of the circle
+    x = x0
+    y = y0 - ((speed / 100) * 2.0)
+
+    # Save the current frame
+    # plt.savefig(f'{ROOT}\\c-r{radius}-dwn-{speed}-{frame:03}.jpg')
+
+    # Update the position of the circle patch
+    circle.set_center((x, y))
+
+def circlediagonal(speed, x0, y0, radius, frame, diagonalDirection):
+    # Update x and y based on the random diagonal direction picked
+    if diagonalDirection == 1: # Up and right
+        x = x0 + ((speed / 100) * 2.0)
+        y = y0 + ((speed / 100) * 2.0)
+    elif diagonalDirection == 2: # Down and right
+        x = x0 + ((speed / 100) * 2.0)
+        y = y0 - ((speed / 100) * 2.0)
+    elif diagonalDirection == 3: # Down and left
+        x = x0 - ((speed / 100) * 2.0)
+        y = y0 - ((speed / 100) * 2.0)
+    elif diagonalDirection == 4: # Up and left
+        x = x0 - ((speed / 100) * 2.0)
+        y = y0 + ((speed / 100) * 2.0)
+
+    # Save the current frame
+    # plt.savefig(f'{ROOT}\\c-r{radius}-diag-{speed}-{frame:03}.jpg')
+
+    circle.set_center((x, y))
+
+def triangle(direction, base, height, speed, ind, diagonalDirection, fig, ax, noise):
     
     i = ind # This is the ith iteration of the program
 
@@ -346,40 +391,14 @@ def setpositiontriangle(direction, base, height, diagonalDirection):
     
     return x1, y1, x2, y2, x3, y3
 
-def test():
-
-    # Create a figure and axis with no axis labels or ticks
-    fig, ax = plt.subplots()
-    # ax.axis('off')
-
-    x1, y1, x2, y2, x3, y3 = 0.8, 0.8, 1.0, 0.8, 0.9, 1.0
-    # Create the circle patch
-    triangle = plt.Polygon([(x1, y1), (x2, y2), (x3, y3)], fc='black')
-
-    # Add the circle to the axis
-    ax.add_patch(triangle)
-
-    # Define the animation function to update the position of the circle
-    def update(frame):
-        # Calculate the new position of the circle
-        x1delta = x1 - frame * 0.01
-        y1delta = y1
-
-        x2delta = x2 - frame * 0.01
-        y2delta = y2
-
-        x3delta = x3 - frame * 0.01
-        y3delta = y3
-
-        # Update the position of the circle patch
-        triangle.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
-
-    # Create an animation object
-    ani = animation.FuncAnimation(fig, update, frames=50, repeat=False, blit=False)
-
-    # Display the animation
-    plt.show()
-
+def generate_noisy_matrix(n, true_percentage):
+    # Initialize a matrix of values from [0, 255]
+    random_matrix = np.random.randint(0, 256, size=(n, n), dtype=np.uint8)
+    # Boolean mask where 'true_percentage' of the values are taken fromm the matrix and the rest are white
+    boolean_mask = np.random.choice([False, True], size=(n, n), p=[1 - true_percentage/100, true_percentage/100])
+    # Take the values from the matrix or white based on the mask
+    noisy_matrix = np.where(boolean_mask, random_matrix, 255)
+    return noisy_matrix
 
 def main(args):
     for i in range(args.iterations):
@@ -401,21 +420,41 @@ def main(args):
         if args.speed == 0:
             randSpeed = True
 
-        # Set a random value for the parameters we want randomized for each animation
+        # Set a random value for the parameters we want randomized for each animation, or what we specified it to be
         if randDirection:
             direction = random.choice(["right", "left", "up", "down", "diagonal"])
+        else:
+            direction = args.direction
+
         if randRadius:
             radius = random.randint(10, 77)
+        else:
+            radius = args.radius
+
         if randBase:
             base = random.randint(10, 75)
+        else:
+            base = args.base
+
         if randTriangleHeight:
             triheight = random.randint(10, 75)
+        else:
+            triheight = args.triheight
+
         if randWidth:
             rectWidth = random.randint(10, 75)
+        else:
+            rectWidth = args.rectWidth
+
         if randRectangleHeight:
             rectHeight = random.randint(10, 75)
+        else:
+            rectHeight = args.rectHeight
+
         if randSpeed:
             speed = random.randint(20, 100)
+        else:
+            speed = args.speed
         
         # Create a figure that's 256x256 pixels
         dpi = 142
@@ -441,9 +480,9 @@ def main(args):
             shape = args.shape
 
         if shape == "circle":
-            circle(direction, radius, speed, i, diagonalDirection, fig, ax)
+            circle(direction, radius, speed, i, diagonalDirection, fig, ax, args.noise)
         elif shape == "triangle":
-            triangle(direction, base, triheight, speed, i, diagonalDirection, fig, ax)
+            triangle(direction, base, triheight, speed, i, diagonalDirection, fig, ax, args.noise)
 
 if __name__ == "__main__":
     main(parser.parse_args())
