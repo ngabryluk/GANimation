@@ -129,11 +129,11 @@ def circleright(circle, speed, noise, randNoise, include_noise, x0, y0, radius, 
     
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-r-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
     
     # Update the position of the patch
     circle.set_center((x, y))
@@ -147,11 +147,11 @@ def circleleft(circle, speed, noise, randNoise, include_noise, x0, y0, radius, f
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-l-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-l-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-l-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-l-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-l-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-c-r{radius}-l-{speed}-{noise}.jpg')
     
     
     # Update the position of the circle patch
@@ -166,11 +166,11 @@ def circleup(circle, speed, noise, randNoise, include_noise, x0, y0, radius, fra
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-u-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-u-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-u-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-u-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-u-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-c-r{radius}-u-{speed}-{noise}.jpg')
     
 
     # Update the position of the circle patch
@@ -185,11 +185,11 @@ def circledown(circle, speed, noise, randNoise, include_noise, x0, y0, radius, f
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-dwn-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-dwn-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-dwn-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-dwn-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-dwn-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-c-r{radius}-dwn-{speed}-{noise}.jpg')
 
     # Update the position of the circle patch
     circle.set_center((x, y))
@@ -213,11 +213,11 @@ def circlediagonal(circle, speed, noise, randNoise, include_noise, x0, y0, radiu
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-diag-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-diag-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-c-r{radius}-diag-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-c-r{radius}-diag-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-diag-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-c-r{radius}-diag-{speed}-{noise}.jpg')
 
     circle.set_center((x, y))
     return x, y
@@ -320,11 +320,11 @@ def triangleright(tri, speed, noise, randNoise, include_noise, x1, y1, x2, y2, x
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-r-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-r-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-r-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-r-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-r-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-r-{speed}-{noise}.jpg')
 
     # Update the position of the triangle patch
     tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
@@ -343,11 +343,11 @@ def triangleleft(tri, speed, noise, randNoise, include_noise, x1, y1, x2, y2, x3
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-l-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-l-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-l-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-l-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-l-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-l-{speed}-{noise}.jpg')
 
     # Update the position of the triangle patch
     tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
@@ -366,11 +366,11 @@ def triangleup(tri, speed, noise, randNoise, include_noise, x1, y1, x2, y2, x3, 
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-u-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-u-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-u-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-u-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-u-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-u-{speed}-{noise}.jpg')
 
     # Update the position of the triangle patch
     tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
@@ -389,11 +389,11 @@ def triangledown(tri, speed, noise, randNoise, include_noise, x1, y1, x2, y2, x3
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-dwn-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-dwn-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-dwn-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-dwn-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-dwn-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-dwn-{speed}-{noise}.jpg')
 
     # Update the position of the triangle patch
     tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
@@ -440,11 +440,11 @@ def trianglediagonal(tri, speed, noise, randNoise, include_noise, x1, y1, x2, y2
 
     # Save the current frame
     if noise > 0:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-diag-{speed}-{noise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-diag-{speed}-{noise}.jpg')
     elif include_noise:
-        plt.savefig(f'{TEMP}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-diag-{speed}-{randNoise}.jpg')
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-diag-{speed}-{randNoise}.jpg')
     else:
-        plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-t-b{base}h{height}-diag-{speed}-{noise}.jpg')
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-t-b{base}h{height}-diag-{speed}-{noise}.jpg')
 
     # Update the position of the triangle patch
     tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
