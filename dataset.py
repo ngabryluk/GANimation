@@ -16,6 +16,7 @@ import imageio
 import argparse
 import os
 import random
+import time
 import pdb
 
 # Path to store the results in
@@ -50,7 +51,7 @@ parser.add_argument("-d", "--direction", choices=["right", "left", "up", "down",
 parser.add_argument("-s", "--speed", type=int, choices=range(20, 101), default=0,
                     help="Set the speed of the animations. This is percentage of the maximum speed of 2 pixels per frame."
 )
-parser.add_argument("-n", "--noise", type=int, choices=range(1, 101), default=0,
+parser.add_argument("-n", "--noise", type=int, choices=range(1, 61), default=0,
                     help="Set the percentage of noise to be added to the image.")
 
 def circle(direction, radius, speed, ind, diagonalDirection, fig, ax, noise):
@@ -66,49 +67,31 @@ def circle(direction, radius, speed, ind, diagonalDirection, fig, ax, noise):
         # Add the circle to the axis
         ax.add_patch(circle)
 
-        # Need to add noise to the the whole figure
-        # It seems that the noise is being added behind the patch
-
-        # plt.savefig("fig.png")
-        # arr = plt.imread("fig.png")
-
-        # pdb.set_trace()
-
-        # plt.imshow(arr, cmap="gray_r")
-        # plt.show()
-
-        # # pdb.set_trace()
-
-        # if os.path.exists("fig.png"):
-        #     os.remove("fig.png")
-        # else:
-        #     print("The file does not exist")
-
-
         # For 50 frames...
         for j in range(50):
             # Create the animation objects and save them
             if direction == "right":
-                circleright(circle, speed, noise, x0, y0, radius, j + 1, i)
+                x0, y0 = circleright(circle, speed, noise, x0, y0, radius, j + 1, i)
                 # ani = animation.FuncAnimation(fig, right, interval=75, frames=50, repeat=False, blit=False)
                 # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-r-{speed}.gif', fps=25)
             elif direction == "left":
-                circleleft(speed, noise, x0, y0, radius, j + 1, i)
+                x0, y0 = circleleft(circle, speed, noise, x0, y0, radius, j + 1, i)
                 # ani = animation.FuncAnimation(fig, left, interval=75, frames=50, repeat=False, blit=False)
                 # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-l-{speed}.gif', fps=25)
             elif direction == "up":
-                circleup(speed, noise, x0, y0, radius, j + 1, i)
+                x0, y0 = circleup(circle, speed, noise, x0, y0, radius, j + 1, i)
                 # ani = animation.FuncAnimation(fig, up, interval=75, frames=50, repeat=False, blit=False)
                 # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-u-{speed}.gif', fps=25)
             elif direction == "down":
-                circledown(speed, noise, x0, y0, radius, j + 1, i)
+                x0, y0 = circledown(circle, speed, noise, x0, y0, radius, j + 1, i)
                 # ani = animation.FuncAnimation(fig, down, interval=75, frames=50, repeat=False, blit=False)
                 # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-dwn-{speed}.gif', fps=25)
             elif direction == "diagonal":
-                circlediagonal(speed, noise, x0, y0, radius, j + 1, i, diagonalDirection)
+                x0, y0 = circlediagonal(circle, speed, noise, x0, y0, radius, j + 1, i, diagonalDirection)
                 # ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
                 # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{speed}.gif', fps=25)
 
+        plt.savefig(f'{TEST}\\{1:03}-{1:02}-c-r{radius}-r-{speed}-{noise}.jpg')
         ####################################
         # Add noise to images if specified #
         ####################################
@@ -119,15 +102,30 @@ def circle(direction, radius, speed, ind, diagonalDirection, fig, ax, noise):
 
             for img in img_list:
                 # Read the image as a numpy array
-                img_arr = imageio.imread(img)
-                img_arr = np.array(img_arr)
+                filepath = os.path.join(TEST, img)
+                img_arr = np.array(imageio.imread(filepath))
+                
+                # Put the image in grayscale to make the shape (256, 256)
+                img_arr = np.dot(img_arr[..., :3], [0.2989, 0.5870, 0.1140])
+                img_arr = np.round(img_arr, 0)
 
                 # Add noise to this 
                 img_arr += generate_noisy_matrix(256, noise)
-                plt.imshow(img_arr, cmap="gray_r")
-                plt.savefig(os.path.join(TEST, img))
+                pdb.set_trace()
+                img_arr = img_arr % 255
+                # img_arr = np.clip(img_arr, 0, 255).astype(np.uint8)
 
-        plt.close()
+                dpi = 142
+                fig2 = plt.figure(2, figsize=(256/dpi, 256/dpi), dpi=dpi)
+                fig2.set_facecolor('black')
+                plt.imshow(img_arr, cmap='gray')
+                plt.axis('off')
+
+                plt.show()
+                pdb.set_trace()
+                fig2.savefig(os.path.join(TEST, img))
+
+                plt.close()
 
 def setpositioncircle(direction, radius, diagonalDirection):
     maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
@@ -160,10 +158,12 @@ def circleright(circle, speed, noise, x0, y0, radius, frame, iteration):
     y = y0
 
     # Save the current frame
-    plt.savefig(f'{TEST}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
+    # plt.savefig(f'{TEST}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
 
     # Update the position of the patch
     circle.set_center((x, y))
+
+    return x, y
 
 def circleleft(speed, x0, y0, radius, frame):
     # Calculate the new position of the circle
@@ -171,7 +171,7 @@ def circleleft(speed, x0, y0, radius, frame):
     y = y0
 
     # Save the current frame
-    # plt.savefig(f'{ROOT}\\{iteration:03}-c-r{radius}-l-{speed}-{frame:02}.jpg')
+    # plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-l-{speed}-{noise}.jpg')
 
     # Update the position of the circle patch
     circle.set_center((x, y))
@@ -182,7 +182,7 @@ def circleup(speed, x0, y0, radius, frame):
     y = y0 + ((speed / 100) * 2.0)
 
     # Save the current frame
-    # plt.savefig(f'{ROOT}\\{iteration:03}-c-r{radius}-u-{speed}-{frame:02}.jpg')
+    # plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-u-{speed}-{noise}.jpg')
 
     # Update the position of the circle patch
     circle.set_center((x, y))
@@ -193,7 +193,7 @@ def circledown(speed, x0, y0, radius, frame):
     y = y0 - ((speed / 100) * 2.0)
 
     # Save the current frame
-    # plt.savefig(f'{ROOT}\\c-r{radius}-dwn-{speed}-{frame:03}.jpg')
+    # plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-dwn-{speed}-{noise}.jpg')
 
     # Update the position of the circle patch
     circle.set_center((x, y))
@@ -397,7 +397,7 @@ def generate_noisy_matrix(n, true_percentage):
     # Boolean mask where 'true_percentage' of the values are taken fromm the matrix and the rest are white
     boolean_mask = np.random.choice([False, True], size=(n, n), p=[1 - true_percentage/100, true_percentage/100])
     # Take the values from the matrix or white based on the mask
-    noisy_matrix = np.where(boolean_mask, random_matrix, 255)
+    noisy_matrix = np.where(boolean_mask, random_matrix, 0)
     return noisy_matrix
 
 def main(args):
@@ -458,7 +458,7 @@ def main(args):
         
         # Create a figure that's 256x256 pixels
         dpi = 142
-        fig = plt.figure(figsize=(256/dpi, 256/dpi), dpi=dpi)
+        fig = plt.figure(1, figsize=(256/dpi, 256/dpi), dpi=dpi)
 
         # Create an axis with no axis labels or ticks and a black background
         ax = fig.add_subplot(111)
