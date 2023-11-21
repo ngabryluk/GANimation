@@ -91,42 +91,6 @@ def circle(direction, radius, speed, ind, diagonalDirection, fig, ax, noise):
                 # ani = animation.FuncAnimation(fig, diagonal, interval=75, frames=50, repeat=False, blit=False)
                 # ani.save(f'{ROOT}\\{i:03}-c-r{radius}-diag-{speed}.gif', fps=25)
 
-        plt.savefig(f'{TEST}\\{1:03}-{1:02}-c-r{radius}-r-{speed}-{noise}.jpg')
-        ####################################
-        # Add noise to images if specified #
-        ####################################
-
-        if noise > 0:
-            # Get a list of the files in the folder where we saved the frames of the animation
-            img_list = os.listdir(TEST)
-
-            for img in img_list:
-                # Read the image as a numpy array
-                filepath = os.path.join(TEST, img)
-                img_arr = np.array(imageio.imread(filepath))
-                
-                # Put the image in grayscale to make the shape (256, 256)
-                img_arr = np.dot(img_arr[..., :3], [0.2989, 0.5870, 0.1140])
-                img_arr = np.round(img_arr, 0)
-
-                # Add noise to this 
-                img_arr += generate_noisy_matrix(256, noise)
-                pdb.set_trace()
-                img_arr = img_arr % 255
-                # img_arr = np.clip(img_arr, 0, 255).astype(np.uint8)
-
-                dpi = 142
-                fig2 = plt.figure(2, figsize=(256/dpi, 256/dpi), dpi=dpi)
-                fig2.set_facecolor('black')
-                plt.imshow(img_arr, cmap='gray')
-                plt.axis('off')
-
-                plt.show()
-                pdb.set_trace()
-                fig2.savefig(os.path.join(TEST, img))
-
-                plt.close()
-
 def setpositioncircle(direction, radius, diagonalDirection):
     maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
     x, y = 0, 0 # Initialize x and y
@@ -151,54 +115,57 @@ def setpositioncircle(direction, radius, diagonalDirection):
 
     return x, y
 
-# Define the animation function to update the position of the patch
 def circleright(circle, speed, noise, x0, y0, radius, frame, iteration):
     # Calculate the new position of the patch
     x = x0 + ((speed / 100) * 2.0)
     y = y0
 
+    # Add noise to images if specified
+    if noise > 0:
+        add_noise(noise)
+
     # Save the current frame
-    # plt.savefig(f'{TEST}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
+    plt.savefig(f'{TEST}\\{iteration+1:03}-{frame:02}-c-r{radius}-r-{speed}-{noise}.jpg')
 
     # Update the position of the patch
     circle.set_center((x, y))
 
     return x, y
 
-def circleleft(speed, x0, y0, radius, frame):
+def circleleft(circle, speed, noise, x0, y0, radius, frame, iteration):
     # Calculate the new position of the circle
     x = x0 - ((speed / 100) * 2.0)
     y = y0
-
-    # Save the current frame
-    # plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-l-{speed}-{noise}.jpg')
-
+    
     # Update the position of the circle patch
     circle.set_center((x, y))
 
-def circleup(speed, x0, y0, radius, frame):
+    # Save the current frame
+    plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-l-{speed}-{noise}.jpg')
+
+def circleup(circle, speed, noise, x0, y0, radius, frame, iteration):
     # Calculate the new position of the circle
     x = x0 
     y = y0 + ((speed / 100) * 2.0)
 
     # Save the current frame
-    # plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-u-{speed}-{noise}.jpg')
+    plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-u-{speed}-{noise}.jpg')
 
     # Update the position of the circle patch
     circle.set_center((x, y))
 
-def circledown(speed, x0, y0, radius, frame):
+def circledown(circle, speed, noise, x0, y0, radius, frame, iteration):
     # Calculate the new position of the circle
     x = x0
     y = y0 - ((speed / 100) * 2.0)
 
     # Save the current frame
-    # plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-dwn-{speed}-{noise}.jpg')
+    plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-dwn-{speed}-{noise}.jpg')
 
     # Update the position of the circle patch
     circle.set_center((x, y))
 
-def circlediagonal(speed, x0, y0, radius, frame, diagonalDirection):
+def circlediagonal(circle, speed, noise, x0, y0, radius, frame, iteration, diagonalDirection):
     # Update x and y based on the random diagonal direction picked
     if diagonalDirection == 1: # Up and right
         x = x0 + ((speed / 100) * 2.0)
@@ -214,7 +181,7 @@ def circlediagonal(speed, x0, y0, radius, frame, diagonalDirection):
         y = y0 + ((speed / 100) * 2.0)
 
     # Save the current frame
-    # plt.savefig(f'{ROOT}\\c-r{radius}-diag-{speed}-{frame:03}.jpg')
+    plt.savefig(f'{ROOT}\\{iteration+1:03}-{frame:02}-c-r{radius}-diag-{speed}-{noise}.jpg')
 
     circle.set_center((x, y))
 
@@ -399,6 +366,39 @@ def generate_noisy_matrix(n, true_percentage):
     # Take the values from the matrix or white based on the mask
     noisy_matrix = np.where(boolean_mask, random_matrix, 0)
     return noisy_matrix
+
+def add_noise(noise):
+    noise_matrix1 = generate_noisy_matrix(256, noise)
+    noise_matrix2 = generate_noisy_matrix(256, noise)
+
+    # Get a list of the files in the folder where we saved the frames of the animation
+    img_list = os.listdir(TEST)
+
+    for img in img_list:
+        # Read the image as a numpy array
+        filepath = os.path.join(TEST, img)
+        img_arr = np.array(imageio.imread(filepath))
+        
+        # Put the image in grayscale to make the shape (256, 256)
+        img_arr = np.dot(img_arr[..., :3], [0.2989, 0.5870, 0.1140])
+        img_arr = np.round(img_arr, 0)
+
+        # Add noise matrix to the img numpy array 
+        img_arr += noise_matrix1
+        img_arr -= noise_matrix2 # For the shape area
+        img_arr = np.clip(img_arr, 0, 255).astype(np.uint8) # Get everything between 0-255
+
+        # Make the figure
+        dpi = 142
+        fig2 = plt.figure(2, figsize=(256/dpi, 256/dpi), dpi=dpi)
+        fig2.set_facecolor('black')
+        plt.imshow(img_arr, cmap='gray')
+        plt.axis('off')
+
+        # Figure out where it needs to be saved                
+        # fig2.savefig(os.path.join(TEST, img))
+
+        plt.close()
 
 def main(args):
     for i in range(args.iterations):
