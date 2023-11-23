@@ -20,14 +20,14 @@ import time
 import pdb
 
 # Path to store the results in
-ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dataset_final")
-TEMP = os.path.join(os.path.dirname(os.path.dirname(__file__)), "temp")
+ROOT = os.path.join('C:\\Users\\ncgab\\Documents\\Senior_Project\\Data', "dataset_final_3")
+TEMP = os.path.join('C:\\Users\\ncgab\\Documents\\Senior_Project\\Data', "temp")
 
 parser = argparse.ArgumentParser(description="Specify the parameters of the data being created.")
 parser.add_argument("-i", "--iterations", type=int, default=1,
                     help="Set the number of animations that will be created."                    
 )
-parser.add_argument("shape", choices=["circle", "rectangle", "triangle"], default=None,
+parser.add_argument("--shape", choices=["circle", "rectangle", "triangle"], default=None,
                     help="Pick the shape that will be used in creating data."
 )
 parser.add_argument("-r", "--radius", type=int, choices=range(10, 78), default=0,
@@ -51,7 +51,7 @@ parser.add_argument("-d", "--direction", choices=["right", "left", "up", "down",
 parser.add_argument("-s", "--speed", type=int, choices=range(20, 101), default=0,
                     help="Set the speed of the animations. This is percentage of the maximum speed of 2 pixels per frame."
 )
-parser.add_argument("-n", "--noise", type=int, choices=range(0, 61), default=0,
+parser.add_argument("-n", "--noise", type=int, choices=range(1, 101), default=0,
                     help="Set the percentage of noise to be added to the image.")
 
 def circle(direction, radius, speed, ind, diagonalDirection, ax, noise, include_noise, randNoise):
@@ -96,7 +96,6 @@ def circle(direction, radius, speed, ind, diagonalDirection, ax, noise, include_
     elif include_noise:
         add_noise(noise_matrix1, noise_matrix2)
 
-    plt.close()
 
 def setpositioncircle(direction, radius, diagonalDirection):
     maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
@@ -265,7 +264,6 @@ def triangle(direction, base, height, speed, ind, diagonalDirection, ax, noise, 
     elif include_noise:
         add_noise(noise_matrix1, noise_matrix2)
 
-    plt.close()
 
 def setpositiontriangle(direction, base, height, diagonalDirection):
     maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
@@ -464,7 +462,7 @@ def add_noise(noise_matrix1, noise_matrix2):
     # Get a list of the files in the folder where we saved the frames of the animation
     img_list = os.listdir(TEMP)
 
-    for img in img_list[-50:]:
+    for img in img_list:
         # Read the image as a numpy array
         filepath = os.path.join(TEMP, img)
         img_arr = np.array(imageio.imread(filepath))
@@ -473,9 +471,11 @@ def add_noise(noise_matrix1, noise_matrix2):
         img_arr = np.dot(img_arr[..., :3], [0.2989, 0.5870, 0.1140])
         img_arr = np.round(img_arr, 0)
 
+        shape_mask = np.where(img_arr != 0) # Get a mask of the indexes where the shape is
+        
         # Add noise matrix to the img numpy array 
         img_arr += noise_matrix1
-        img_arr -= noise_matrix2 # For the shape area
+        img_arr[shape_mask] -= noise_matrix2[shape_mask] # For the shape area
         img_arr = np.clip(img_arr, 0, 255).astype(np.uint8) # Get everything between 0-255
 
         # Make the figure
@@ -485,7 +485,14 @@ def add_noise(noise_matrix1, noise_matrix2):
         plt.imshow(img_arr, cmap='gray')
         plt.axis('off')
 
+        plt.show()
+        pdb.set_trace()
+
         fig2.savefig(os.path.join(ROOT, img))
+
+        os.remove(os.path.join(TEMP, img))
+
+        plt.close()
 
 def main(args):
     for i in range(args.iterations):
@@ -543,11 +550,12 @@ def main(args):
         else:
             speed = args.speed
 
+
         # Coin flip to decide if to include noise or not when specified
         include_noise = np.random.choice([True, False])
         
         # The noise to add if include_noise is True
-        randNoise = np.random.randint(1, 61)
+        randNoise = np.random.randint(0, 81)
         
         # Create a figure that's 256x256 pixels
         dpi = 142
@@ -568,14 +576,22 @@ def main(args):
 
         shape = None
         if args.shape is None:
-            shape = random.choice(["circle", "rectangle", "triangle"])
+            shape = random.choice(["circle", "triangle"])
         else:
             shape = args.shape
+
+        # Make a temp directory to store the files before adding noise
+        os.makedirs(TEMP)
 
         if shape == "circle":
             circle(direction, radius, speed, i, diagonalDirection, ax, args.noise, include_noise, randNoise)
         elif shape == "triangle":
             triangle(direction, base, triheight, speed, i, diagonalDirection, ax, args.noise, include_noise, randNoise)
+
+        # Delete that temp directory
+        os.rmdir(TEMP)
+
+        plt.close()
 
 if __name__ == "__main__":
     main(parser.parse_args())
