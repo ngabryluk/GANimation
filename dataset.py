@@ -51,7 +51,7 @@ parser.add_argument("-d", "--direction", choices=["right", "left", "up", "down",
 parser.add_argument("-s", "--speed", type=int, choices=range(20, 101), default=0,
                     help="Set the speed of the animations. This is percentage of the maximum speed of 2 pixels per frame."
 )
-parser.add_argument("-n", "--noise", type=int, choices=range(1, 101), default=0,
+parser.add_argument("-n", "--noise", type=int, choices=range(0, 101), default=0,
                     help="Set the percentage of noise to be added to the image.")
 
 def circle(direction, radius, speed, ind, diagonalDirection, ax, noise, include_noise, randNoise):
@@ -91,11 +91,8 @@ def circle(direction, radius, speed, ind, diagonalDirection, ax, noise, include_
             x0, y0 = circlediagonal(circle, speed, noise, randNoise, include_noise, x0, y0, radius, j + 1, i, diagonalDirection)
 
     # After the frames have been saved, go back and add noise to those frames if we have noise
-    if noise > 0:
-        add_noise(noise_matrix1, noise_matrix2)
-    elif include_noise:
-        add_noise(noise_matrix1, noise_matrix2)
-
+    if noise > 0 or include_noise:
+        add_noise(noise_matrix1, noise_matrix2, noise)
 
 def setpositioncircle(direction, radius, diagonalDirection):
     maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
@@ -221,6 +218,7 @@ def circlediagonal(circle, speed, noise, randNoise, include_noise, x0, y0, radiu
     circle.set_center((x, y))
     return x, y
 
+
 def triangle(direction, base, height, speed, ind, diagonalDirection, ax, noise, include_noise, randNoise):
     
     i = ind # This is the ith iteration of the program
@@ -259,11 +257,8 @@ def triangle(direction, base, height, speed, ind, diagonalDirection, ax, noise, 
             x1, y1, x2, y2, x3, y3 = trianglediagonal(tri, speed, noise, randNoise, include_noise, x1, y1, x2, y2, x3, y3, base, height, j + 1, i, diagonalDirection)
 
     # After the frames have been saved, go back and add noise to those frames if we have noise
-    if noise > 0:
-        add_noise(noise_matrix1, noise_matrix2)
-    elif include_noise:
-        add_noise(noise_matrix1, noise_matrix2)
-
+    if noise > 0 or include_noise:
+        add_noise(noise_matrix1, noise_matrix2, noise)
 
 def setpositiontriangle(direction, base, height, diagonalDirection):
     maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
@@ -448,6 +443,171 @@ def trianglediagonal(tri, speed, noise, randNoise, include_noise, x1, y1, x2, y2
     tri.set_xy([(x1delta, y1delta), (x2delta, y2delta), (x3delta, y3delta)])
     return x1delta, y1delta, x2delta, y2delta, x3delta, y3delta
 
+
+def rectangle(direction, width, height, speed, ind, diagonalDirection, ax, noise, include_noise, randNoise):
+    
+    i = ind # This is the ith iteration of the program
+
+    # Define the initial position of the shape based on the direction (we don't want to go out of bounds!)
+    x0, y0 = setpositionrectangle(direction, width, height, diagonalDirection)
+
+    # Create the circle patch
+    rect = plt.Rectangle((x0, y0), width, height, fc='white')
+
+    # Add the circle to the axis
+    ax.add_patch(rect)
+
+    # If noise is specified, generate the noisy matrix with that noise
+    if noise > 0:
+        noise_matrix1 = generate_noisy_matrix(256, noise)
+        noise_matrix2 = generate_noisy_matrix(256, noise)
+    # Generate the noisy matrix with the random noise if the flag to include noise is True
+    elif include_noise:
+        noise_matrix1 = generate_noisy_matrix(256, randNoise)
+        noise_matrix2 = generate_noisy_matrix(256, randNoise)
+
+    # For 50 frames...
+    for j in range(50):
+        # Move the circle in the direction given
+        if direction == "right":
+            x0, y0 = rectangleright(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, j + 1, i)
+        elif direction == "left":
+            x0, y0 = rectangleleft(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, j + 1, i)
+        elif direction == "up":
+            x0, y0 = rectangleup(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, j + 1, i)
+        elif direction == "down":
+            x0, y0 = rectangledown(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, j + 1, i)
+        elif direction == "diagonal":
+            x0, y0 = rectanglediagonal(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, j + 1, i, diagonalDirection)
+
+    # After the frames have been saved, go back and add noise to those frames if we have noise
+    if noise > 0 or include_noise:
+        add_noise(noise_matrix1, noise_matrix2, noise)
+
+def setpositionrectangle(direction, width, height, diagonalDirection):
+    maxDistOver = 155 # Farthest over shape can be (x or y axis) without going off the board from the animation
+    x, y = 0, 0 # Initialize x and y
+
+    if direction == "right":
+        x, y = round(random.uniform(0, maxDistOver - width), 2), round(random.uniform(0, 256 - height), 2)
+    elif direction == 'left':
+        x, y = round(random.uniform(maxDistOver, 256 - width), 2), round(random.uniform(0, 256 - height), 2)
+    elif direction == 'up':
+        x, y = round(random.uniform(0, 256 - width), 2), round(random.uniform(0, maxDistOver - height), 2)
+    elif direction == 'down':
+        x, y = round(random.uniform(0, 256 - width), 2), round(random.uniform(maxDistOver, 256 - height), 2)
+    elif direction == 'diagonal':
+        if diagonalDirection == 1:
+            x, y = round(random.uniform(0, maxDistOver - width), 2), round(random.uniform(0, maxDistOver - height), 2)
+        elif diagonalDirection == 2:
+            x, y = round(random.uniform(0, maxDistOver - width), 2), round(random.uniform(maxDistOver, 256 - height), 2)
+        elif diagonalDirection == 3:
+            x, y = round(random.uniform(maxDistOver, 256 - width), 2), round(random.uniform(maxDistOver, 256 - height), 2)
+        elif diagonalDirection == 4:
+            x, y = round(random.uniform(maxDistOver, 256 - width), 2), round(random.uniform(0, maxDistOver - height), 2)
+
+    return x, y
+
+def rectangleright(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, frame, iteration):
+    # Calculate the new position of the patch
+    x = x0 + ((speed / 100) * 2.0)
+    y = y0
+    
+    # Save the current frame
+    if noise > 0:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-r-{speed}-{noise}.jpg')
+    elif include_noise:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-r-{speed}-{randNoise}.jpg')
+    else:
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-r-{speed}-{noise}.jpg')
+    
+    # Update the position of the patch
+    rect.set_xy((x, y))
+
+    return x, y
+
+def rectangleleft(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, frame, iteration):
+    # Calculate the new position of the patch
+    x = x0 - ((speed / 100) * 2.0)
+    y = y0
+
+    # Save the current frame
+    if noise > 0:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-l-{speed}-{noise}.jpg')
+    elif include_noise:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-l-{speed}-{randNoise}.jpg')
+    else:
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-l-{speed}-{noise}.jpg')
+    
+    # Update the position of the patch
+    rect.set_xy((x, y))
+
+    return x, y
+
+def rectangleup(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, frame, iteration):
+    # Calculate the new position of the circle
+    x = x0 
+    y = y0 + ((speed / 100) * 2.0)
+
+    # Save the current frame
+    if noise > 0:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-u-{speed}-{noise}.jpg')
+    elif include_noise:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-u-{speed}-{randNoise}.jpg')
+    else:
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-u-{speed}-{noise}.jpg')
+    
+    # Update the position of the patch
+    rect.set_xy((x, y))
+
+    return x, y
+
+def rectangledown(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, frame, iteration):
+    # Calculate the new position of the circle
+    x = x0
+    y = y0 - ((speed / 100) * 2.0)
+
+    # Save the current frame
+    if noise > 0:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-dwn-{speed}-{noise}.jpg')
+    elif include_noise:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-dwn-{speed}-{randNoise}.jpg')
+    else:
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-dwn-{speed}-{noise}.jpg')
+    
+    # Update the position of the patch
+    rect.set_xy((x, y))
+
+    return x, y
+
+def rectanglediagonal(rect, speed, noise, randNoise, include_noise, x0, y0, width, height, frame, iteration, diagonalDirection):
+    # Update x and y based on the random diagonal direction picked
+    if diagonalDirection == 1: # Up and right
+        x = x0 + ((speed / 100) * 2.0)
+        y = y0 + ((speed / 100) * 2.0)
+    elif diagonalDirection == 2: # Down and right
+        x = x0 + ((speed / 100) * 2.0)
+        y = y0 - ((speed / 100) * 2.0)
+    elif diagonalDirection == 3: # Down and left
+        x = x0 - ((speed / 100) * 2.0)
+        y = y0 - ((speed / 100) * 2.0)
+    elif diagonalDirection == 4: # Up and left
+        x = x0 - ((speed / 100) * 2.0)
+        y = y0 + ((speed / 100) * 2.0)
+
+    # Save the current frame
+    if noise > 0:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-diag-{speed}-{noise}.jpg')
+    elif include_noise:
+        plt.savefig(f'{TEMP}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-diag-{speed}-{randNoise}.jpg')
+    else:
+        plt.savefig(f'{ROOT}\\{iteration+1:05}-{frame:02}-r-w{width}h{height}-diag-{speed}-{noise}.jpg')
+    
+    # Update the position of the patch
+    rect.set_xy((x, y))
+
+    return x, y
+
 def generate_noisy_matrix(n, true_percentage):
     # Initialize a matrix of values from [0, 255]
     random_matrix = np.random.randint(0, 256, size=(n, n), dtype=np.uint8)
@@ -457,7 +617,7 @@ def generate_noisy_matrix(n, true_percentage):
     noisy_matrix = np.where(boolean_mask, random_matrix, 0)
     return noisy_matrix
 
-def add_noise(noise_matrix1, noise_matrix2):
+def add_noise(noise_matrix1, noise_matrix2, noise):
     
     # Get a list of the files in the folder where we saved the frames of the animation
     img_list = os.listdir(TEMP)
@@ -475,6 +635,10 @@ def add_noise(noise_matrix1, noise_matrix2):
         
         # Add noise matrix to the img numpy array 
         img_arr += noise_matrix1
+        
+        # Adjust the matrix so the noise adjustment looks better
+        img_arr[shape_mask] -= noise_matrix1[shape_mask]
+
         img_arr[shape_mask] -= noise_matrix2[shape_mask] # For the shape area
         img_arr = np.clip(img_arr, 0, 255).astype(np.uint8) # Get everything between 0-255
 
@@ -485,9 +649,6 @@ def add_noise(noise_matrix1, noise_matrix2):
         plt.imshow(img_arr, cmap='gray')
         plt.axis('off')
 
-        plt.show()
-        pdb.set_trace()
-
         fig2.savefig(os.path.join(ROOT, img))
 
         os.remove(os.path.join(TEMP, img))
@@ -495,6 +656,7 @@ def add_noise(noise_matrix1, noise_matrix2):
         plt.close()
 
 def main(args):
+    random.seed(4899)
     for i in range(args.iterations):
         # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
         randDirection, randRadius, randBase, randTriangleHeight, randWidth, randRectangleHeight, randSpeed = False, False, False, False, False, False, False
@@ -555,7 +717,7 @@ def main(args):
         include_noise = np.random.choice([True, False])
         
         # The noise to add if include_noise is True
-        randNoise = np.random.randint(0, 81)
+        randNoise = np.random.randint(1, 61)
         
         # Create a figure that's 256x256 pixels
         dpi = 142
@@ -576,7 +738,7 @@ def main(args):
 
         shape = None
         if args.shape is None:
-            shape = random.choice(["circle", "triangle"])
+            shape = random.choice(["circle", "triangle", "rectangle"])
         else:
             shape = args.shape
 
@@ -587,6 +749,8 @@ def main(args):
             circle(direction, radius, speed, i, diagonalDirection, ax, args.noise, include_noise, randNoise)
         elif shape == "triangle":
             triangle(direction, base, triheight, speed, i, diagonalDirection, ax, args.noise, include_noise, randNoise)
+        elif shape == "rectangle":
+            rectangle(direction, rectWidth, rectHeight, speed, i, diagonalDirection, ax, args.noise, include_noise, randNoise)
 
         # Delete that temp directory
         os.rmdir(TEMP)
@@ -595,5 +759,3 @@ def main(args):
 
 if __name__ == "__main__":
     main(parser.parse_args())
-
-    
