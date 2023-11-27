@@ -1,4 +1,5 @@
 /GANimation/UCF101_subset
+/GANimation/fake_data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
