@@ -20,8 +20,8 @@ import time
 import pdb
 
 # Path to store the results in
-ROOT = os.path.join('C:\\Users\\ncgab\\Documents\\Senior_Project\\Data', "dataset_final_3")
-TEMP = os.path.join('C:\\Users\\ncgab\\Documents\\Senior_Project\\Data', "temp")
+ROOT = os.path.join(os.path.dirname(__file__), "Data\\dataset_final_3")
+TEMP = os.path.join(os.path.dirname(__file__), "Data\\temp")
 
 parser = argparse.ArgumentParser(description="Specify the parameters of the data being created.")
 parser.add_argument("-i", "--iterations", type=int, default=1,
