@@ -11,6 +11,38 @@ from math import floor
 import pdb
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-n",
+    "--num_samples",
+    type=int,
+    default=100,
+    help="Number of samples for the generators to create in a test run",
+)
+parser.add_argument(
+    "-g",
+    "--generate",
+    action="store_true",
+    default=False,
+    help="Flag determining whether or not to generate fake images",
+)
+parser.add_argument(
+    "-s",
+    "--shape",
+    type=int,
+    nargs=3,
+    default=[256, 256, 1],
+    help="Shape of input to model",
+)
+parser.add_argument(
+    "-u",
+    "--upsamples",
+    type=int,
+    default=4,
+    help="Number of upsample groups the model should have",
+)
 
 
 class PrimaryGenerator(Model):
@@ -150,13 +182,23 @@ class RefinementGenerator(Model):
         pass
 
 
-if __name__ == "__main__":
+def main(args):
+    shape = tuple(args.shape)
     test = PrimaryGenerator()
     print("Test model assigned")
-    test.make_model((256, 256, 1), 4)
+    test.make_model(shape, args.upsamples)
     print("Test model made")
     test.summary()
-    print("Testing what the model outputs")
-    output = test.predict(np.random.random(size=(1, 100)))
-    print(output)
-    plt.imsave("test.png", output[0, :, :, 0])
+    if args.generate:
+        print("Testing what the model outputs")
+        output = test.predict(np.random.random(size=(args.num_samples, 100)))
+        print(output)
+        for i in range(len(output)):
+            plt.imsave(
+                f"fake_data/fake{str(i + 1).zfill(len(str(args.num_samples)))}.png",
+                output[i, :, :, 0],
+            )
+
+
+if __name__ == "__main__":
+    main(parser.parse_args())

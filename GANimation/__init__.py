@@ -4,6 +4,23 @@ from os import path
 sys.path.append(path.abspath(path.dirname(__file__)))
 
 from tf_utils import *
+import tensorflow_datasets as tfds
+import pdb
+
+import ssl
+import urllib
+import requests
+
+requests.packages.urllib3.disable_warnings()
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = _create_unverified_https_context
 
 
 __all__ = [
@@ -18,6 +35,7 @@ __all__ = [
 __spec__ = "GANimation"
 
 if __name__ == "__main__":
+    train, test = tfds.load("ucf101", split=["train", "test"], shuffle_files=False)
     URL = "https://storage.googleapis.com/thumos14_files/UCF101_videos.zip"
     NUM_CLASSES = 10
     FILES_PER_CLASS = 50
