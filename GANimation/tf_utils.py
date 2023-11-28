@@ -15,10 +15,10 @@ import remotezip as rz
 import tensorflow as tf
 
 # Some modules to display an animation using imageio.
-import imageio
+import imageio.v2 as imageio
 from IPython import display
 from urllib import request
-from tensorflow_docs.vis import embed
+# from tensorflow_docs.vis import embed
 
 
 def list_files_from_zip_url(zip_url):
@@ -228,6 +228,6 @@ def frames_from_video_file(video_path, n_frames, output_size=(224, 224), frame_s
 
 
 def to_gif(images):
-    converted_images = np.clip(images * 255, 0, 255).astype(np.uint8)
-    imageio.mimsave("./animation.gif", converted_images, fps=10)
-    return embed.embed_file("./animation.gif")
+    converted_images = np.clip(images, 0, 255).astype(np.uint8)
+    imageio.mimsave("./animation.gif", converted_images, fps=25)
+    # return embed.embed_file("./animation.gif")

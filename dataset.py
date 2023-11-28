@@ -20,8 +20,8 @@ import time
 import pdb
 
 # Path to store the results in
-ROOT = os.path.join(os.path.dirname(__file__), "Data\\dataset_final_3")
-TEMP = os.path.join(os.path.dirname(__file__), "Data\\temp")
+ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Data\\dataset')
+TEMP = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Data\\temp')
 
 parser = argparse.ArgumentParser(description="Specify the parameters of the data being created.")
 parser.add_argument("-i", "--iterations", type=int, default=1,
@@ -53,6 +53,8 @@ parser.add_argument("-s", "--speed", type=int, choices=range(20, 101), default=0
 )
 parser.add_argument("-n", "--noise", type=int, choices=range(0, 101), default=0,
                     help="Set the percentage of noise to be added to the image.")
+parser.add_argument("--seed", type=int, default=None,
+                    help="Apply a seed to initialize the random number generator.")
 
 def circle(direction, radius, speed, ind, diagonalDirection, ax, noise, include_noise, randNoise):
         
@@ -656,7 +658,9 @@ def add_noise(noise_matrix1, noise_matrix2, noise):
         plt.close()
 
 def main(args):
-    random.seed(4899)
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
     for i in range(args.iterations):
         # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
         randDirection, randRadius, randBase, randTriangleHeight, randWidth, randRectangleHeight, randSpeed = False, False, False, False, False, False, False
