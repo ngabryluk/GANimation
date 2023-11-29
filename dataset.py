@@ -658,6 +658,8 @@ def add_noise(noise_matrix1, noise_matrix2, noise):
         plt.close()
 
 def main(args):
+    if not os.path.exists(ROOT):
+            os.makedirs(ROOT)
     if args.seed is not None:
         random.seed(args.seed)
         np.random.seed(args.seed)
