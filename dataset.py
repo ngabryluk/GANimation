@@ -661,6 +661,8 @@ def main(args):
     if args.seed is not None:
         random.seed(args.seed)
         np.random.seed(args.seed)
+    if not os.path.exits(ROOT):
+        os.makedirs(ROOT)
     for i in range(args.iterations):
         # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
         randDirection, randRadius, randBase, randTriangleHeight, randWidth, randRectangleHeight, randSpeed = False, False, False, False, False, False, False
@@ -747,7 +749,8 @@ def main(args):
             shape = args.shape
 
         # Make a temp directory to store the files before adding noise
-        os.makedirs(TEMP)
+        if not os.path.exists(TEMP):
+            os.makedirs(TEMP)
 
         if shape == "circle":
             circle(direction, radius, speed, i, diagonalDirection, ax, args.noise, include_noise, randNoise)
