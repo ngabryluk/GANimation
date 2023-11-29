@@ -38,23 +38,37 @@ __spec__ = "GANimation"
 if __name__ == "__main__":
 
     DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'Data\\dataset')
+    SAVE_PATH = os.path.join(os.getcwd(), 'save_folder')
+    if not os.path.exists(SAVE_PATH):
+        os.makedirs(SAVE_PATH)
+        # Reads in the images from our synthetic dataset into a numpy array
+        images = os.listdir(DATA_PATH)
+        train = np.empty((len(images) - 2, 2, 256, 256))
+        test = np.empty((len(images) - 2, 256, 256))
+        for i in range(len(images) - 2):
+            filepath1 = os.path.join(DATA_PATH, images[i])
+            filepath2 = os.path.join(DATA_PATH, images[i + 2])
+            
+            arr1 = np.array(imageio.imread(filepath1))
+            arr2 = np.array(imageio.imread(filepath2))
+            
+            arr1 = np.dot(arr1[..., :3], [0.2989, 0.5870, 0.1140])
+            arr2 = np.dot(arr2[..., :3], [0.2989, 0.5870, 0.1140])
+            
+            arr1 = np.round(arr1, 0)
+            arr2 = np.round(arr2, 0)
 
-    # Reads in the images from our synthetic dataset into a numpy array
-    images = os.listdir(DATA_PATH)
-    img_arr = np.empty((len(images), 256, 256))
-    for i in range(len(images)):
-        # Read the image as a numpy array
-        filepath = os.path.join(DATA_PATH, images[i])
-        arr = np.array(imageio.imread(filepath))
-        
-        # Put the image in grayscale to make the shape (256, 256)
-        arr = np.dot(arr[..., :3], [0.2989, 0.5870, 0.1140])
-        arr = np.round(arr, 0)
-        
-        img_arr[i] = arr # Add to the numpy array of images
+            train[i] = (arr1, arr2)
+            if i != 0:
+                test[i-1] = arr1
+        np.save(os.path.join(SAVE_PATH, 'train.npy'), train)
+        np.save(os.path.join(SAVE_PATH, 'test.npy'), test)
+    train = np.load(os.path.join(SAVE_PATH, 'train.npy'))
+    test = np.load(os.path.join(SAVE_PATH, 'test.npy'))
+    pdb.set_trace()
     
     # Preview a gif of the first sample
-    # to_gif(img_arr[:50])
+    # to_gif(train[:50, 0, :, :].reshape(50, 256, 256))
 
     
 
