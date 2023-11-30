@@ -1,6 +1,6 @@
 import numpy as np
 import os
-import imageio.v2
+import imageio.v2 as imageio
 import pdb
 import tensorflow as tf
 from tensorflow.keras import layers
@@ -67,7 +67,7 @@ def to_gif(images):
 
 frame_pairs, real_middles = load()
 
-pdb.set_trace()
+# pdb.set_trace()
 
 # INP = input_images[0].reshape(256, 512, 1)
 
@@ -106,6 +106,39 @@ def make_generator_model():
     return model
 
 generator = make_generator_model()
-# noise = tf.random.normal([1, 100])
-# generated_image = generator(noise, training=False)
+noise = tf.random.normal([1, 100])
+generated_image = generator(noise, training=False)
 # pdb.set_trace()
+
+def make_discriminator_model():
+    model = tf.keras.Sequential()
+    
+    model.add(layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same', input_shape=[256, 256, 1]))
+    model.add(layers.LeakyReLU())
+    model.add(layers.Dropout(0.3))
+
+    model.add(layers.Conv2D(128, (5, 5), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU())
+    model.add(layers.Dropout(0.3))
+
+    model.add(layers.Flatten())
+    model.add(layers.Dense(1, activation='sigmoid'))
+
+    return model
+
+discriminator = make_discriminator_model()
+decision = discriminator(generated_image)
+print (decision)
+pdb.set_trace()
+
+# This method returns a helper function to compute cross entropy loss
+cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+
+def discriminator_loss(real_output, fake_output):
+    real_loss = cross_entropy(tf.ones_like(real_output), real_output)
+    fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
+    total_loss = real_loss + fake_loss
+    return total_loss
+
+def generator_loss(fake_output):
+    return cross_entropy(tf.ones_like(fake_output), fake_output)
