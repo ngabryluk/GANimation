@@ -3,6 +3,7 @@ import os
 import imageio.v2
 import pdb
 import tensorflow as tf
+from tensorflow.keras import layers
 import matplotlib.pyplot as plt
 
 NUM_VIDEOS = 500 # Total number of "videos" or sets of frames that were generated
@@ -66,8 +67,45 @@ def to_gif(images):
 
 frame_pairs, real_middles = load()
 
+pdb.set_trace()
+
 # INP = input_images[0].reshape(256, 512, 1)
 
-OUTPUT_CHANNELS = 3
+def make_generator_model():
+    model = tf.keras.Sequential()
+    model.add(layers.Dense(8*8*256, use_bias=False, input_shape=(100,)))
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU())
 
-pdb.set_trace()
+    model.add(layers.Reshape((8, 8, 256)))
+    assert model.output_shape == (None, 8, 8, 256)  # Note: None is the batch size
+
+    model.add(layers.Conv2DTranspose(128, (5, 5), strides=(2, 2), padding='same', use_bias=False))
+    assert model.output_shape == (None, 16, 16, 128)
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU())
+
+    model.add(layers.Conv2DTranspose(128, (5, 5), strides=(2, 2), padding='same', use_bias=False))
+    assert model.output_shape == (None, 32, 32, 128)
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU())
+
+    model.add(layers.Conv2DTranspose(128, (5, 5), strides=(2, 2), padding='same', use_bias=False))
+    assert model.output_shape == (None, 64, 64, 128)
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU())
+
+    model.add(layers.Conv2DTranspose(64, (5, 5), strides=(2, 2), padding='same', use_bias=False))
+    assert model.output_shape == (None, 128, 128, 64)
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU())
+
+    model.add(layers.Conv2DTranspose(1, (5, 5), strides=(2, 2), padding='same', use_bias=False, activation='tanh'))
+    assert model.output_shape == (None, 256, 256, 1)
+
+    return model
+
+generator = make_generator_model()
+# noise = tf.random.normal([1, 100])
+# generated_image = generator(noise, training=False)
+# pdb.set_trace()
