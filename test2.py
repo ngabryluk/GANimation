@@ -73,16 +73,13 @@ def to_gif(images):
 
 frame_pairs, real_middles = load()
 
-# pdb.set_trace()
+pdb.set_trace()
 
 def make_generator_model():
     model = tf.keras.Sequential()
-    model.add(layers.Dense(8*8*256, use_bias=False, input_shape=(100,)))
-    model.add(layers.BatchNormalization())
-    model.add(layers.LeakyReLU())
-
-    model.add(layers.Reshape((8, 8, 256)))
-    assert model.output_shape == (None, 8, 8, 256)  # Note: None is the batch size
+    
+    # Downsample a little then upsample
+    model.add(layers.Reshape((256, 256, 1), input_shape=(256, 256)))
 
     model.add(layers.Conv2DTranspose(128, (5, 5), strides=(2, 2), padding='same', use_bias=False))
     assert model.output_shape == (None, 16, 16, 128)
@@ -110,9 +107,8 @@ def make_generator_model():
     return model
 
 generator = make_generator_model()
-noise = tf.random.normal([1, 100])
-generated_image = generator(noise, training=False)
-# pdb.set_trace()
+generated_image = generator(frame_pairs[0, :, :, :256], training=False)
+pdb.set_trace()
 
 def make_discriminator_model():
     model = tf.keras.Sequential()
@@ -153,23 +149,18 @@ EPOCHS = 10
 noise_dim = 100
 num_examples_to_generate = 16
 
-# You will reuse this seed overtime (so it's easier)
-# to visualize progress in the animated GIF)
-seed = tf.random.normal([num_examples_to_generate, noise_dim])
-
 # Notice the use of `tf.function`
 # This annotation causes the function to be "compiled".
 @tf.function
-def train_step(images):
-    noise = tf.random.normal([BATCH_SIZE, noise_dim])
-
+def train_step(frame_pairs, real_middles):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-        generated_images = generator(noise, training=True)
-
-        real_output = discriminator(images, training=True)
+        current_frames = frame_pairs[:, :, :, :, :256]
+        generated_images = generator(current_frames, training=True)
+        
+        real_output = discriminator(real_middles, training=True)
         fake_output = discriminator(generated_images, training=True)
 
-        gen_loss = generator_loss(fake_output)
+        gen_loss = generator_loss(fake_output, real_middles)
         disc_loss = discriminator_loss(real_output, fake_output)
 
     gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
@@ -178,34 +169,49 @@ def train_step(images):
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
-def train(real_middles, epochs):
+def train(frame_pairs, real_middles, epochs):
     for epoch in range(epochs):
         start = time.time()
+        # pdb.set_trace()
+        for i in range(len(frame_pairs)):
+            current_frames = frame_pairs[i]
+            ground_truth_middles = real_middles[i]
 
-        for image_batch in real_middles:
-            train_step(image_batch)
+            # Perform a training step for the generator and discriminator
+            train_step(current_frames, ground_truth_middles)
 
         # Produce images for the GIF as you go
-        generate_and_save_images(generator, epoch + 1, seed)
+        generate_and_save_images(generator, epoch + 1, frame_pairs[:, 0, :, :, :256])
 
         print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
 
     # Generate after the final epoch
-    generate_and_save_images(generator, epochs, seed)
+    generate_and_save_images(generator, epochs, frame_pairs[:, 0, :, :, :256])
     
 def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
     # This is so all layers run in inference mode (batchnorm).
     predictions = model(test_input, training=False)
 
-    fig = plt.figure(figsize=(6, 4))
+    # Create a figure that's 256x256 pixels
+    dpi = 142
+    fig = plt.figure(1, figsize=(256/dpi, 256/dpi), dpi=dpi)
+
+    # Create an axis with no axis labels or ticks and a black background
+    ax = fig.add_subplot(111)
+    ax.axis('off')
+    ax.set_facecolor("black")
+
+    # Set the plot axis to by 256 x 256 to match the pixels
+    ax.set_xlim(0, 256)
+    ax.set_ylim(0, 256)
 
     for i in range(predictions.shape[0]):
-        plt.subplot(6, 4, i+1)
-        plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
+        plt.imshow(predictions[i, :, :, 0], cmap='gray')
         plt.axis('off')
 
     plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
-    plt.show()
+    plt.close()
+    # plt.show()
 
-train(real_middles, EPOCHS)
+train(frame_pairs, real_middles, EPOCHS)
