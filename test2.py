@@ -5,9 +5,11 @@ import pdb
 import tensorflow as tf
 from tensorflow.keras import layers
 import matplotlib.pyplot as plt
+import time
 
 NUM_VIDEOS = 500 # Total number of "videos" or sets of frames that were generated
 NUM_FRAMES = 50 # Number of frames per video
+BATCH_SIZE = 24
 
 # Idea to try: Use half of the frames and interpolate the frames in between to get back to 50, but save those in between frames to be the ground truth
 def load():
@@ -51,7 +53,11 @@ def load():
             
             real_middles[middles_index] = arr3
             middles_index += 1
-
+        
+        # Split into batches (each sample)
+        frame_pairs = np.array(np.array_split(frame_pairs, len(frame_pairs) // BATCH_SIZE))
+        real_middles = np.array(np.array_split(real_middles, len(real_middles) // BATCH_SIZE))
+        
         np.save(os.path.join(SAVE_PATH, "frame_pairs.npy"), frame_pairs)
         np.save(os.path.join(SAVE_PATH, "real_middles.npy"), real_middles)
     frame_pairs = np.load(os.path.join(SAVE_PATH, "frame_pairs.npy"))
@@ -68,8 +74,6 @@ def to_gif(images):
 frame_pairs, real_middles = load()
 
 # pdb.set_trace()
-
-# INP = input_images[0].reshape(256, 512, 1)
 
 def make_generator_model():
     model = tf.keras.Sequential()
@@ -129,7 +133,6 @@ def make_discriminator_model():
 discriminator = make_discriminator_model()
 decision = discriminator(generated_image)
 print (decision)
-pdb.set_trace()
 
 # This method returns a helper function to compute cross entropy loss
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -142,3 +145,67 @@ def discriminator_loss(real_output, fake_output):
 
 def generator_loss(fake_output):
     return cross_entropy(tf.ones_like(fake_output), fake_output)
+
+generator_optimizer = tf.keras.optimizers.Adam(1e-4)
+discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
+
+EPOCHS = 10
+noise_dim = 100
+num_examples_to_generate = 16
+
+# You will reuse this seed overtime (so it's easier)
+# to visualize progress in the animated GIF)
+seed = tf.random.normal([num_examples_to_generate, noise_dim])
+
+# Notice the use of `tf.function`
+# This annotation causes the function to be "compiled".
+@tf.function
+def train_step(images):
+    noise = tf.random.normal([BATCH_SIZE, noise_dim])
+
+    with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+        generated_images = generator(noise, training=True)
+
+        real_output = discriminator(images, training=True)
+        fake_output = discriminator(generated_images, training=True)
+
+        gen_loss = generator_loss(fake_output)
+        disc_loss = discriminator_loss(real_output, fake_output)
+
+    gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
+    gradients_of_discriminator = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
+
+    generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
+    discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
+
+def train(real_middles, epochs):
+    for epoch in range(epochs):
+        start = time.time()
+
+        for image_batch in real_middles:
+            train_step(image_batch)
+
+        # Produce images for the GIF as you go
+        generate_and_save_images(generator, epoch + 1, seed)
+
+        print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
+
+    # Generate after the final epoch
+    generate_and_save_images(generator, epochs, seed)
+    
+def generate_and_save_images(model, epoch, test_input):
+    # Notice `training` is set to False.
+    # This is so all layers run in inference mode (batchnorm).
+    predictions = model(test_input, training=False)
+
+    fig = plt.figure(figsize=(6, 4))
+
+    for i in range(predictions.shape[0]):
+        plt.subplot(6, 4, i+1)
+        plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
+        plt.axis('off')
+
+    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
+    plt.show()
+
+train(real_middles, EPOCHS)
