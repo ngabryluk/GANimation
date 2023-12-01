@@ -196,7 +196,7 @@ def generator_loss(fake_output, real_middles):
 generator_optimizer = tf.keras.optimizers.Adam(1e-4)
 discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
-EPOCHS = 10
+EPOCHS = 100
 noise_dim = 100
 
 # Notice the use of `tf.function`
@@ -237,7 +237,9 @@ def train(frame_pairs, real_middles, epochs):
 
     # Generate after the final epoch
     generate_and_save_images(generator, epochs, frame_pairs[0, :, :, :256])
-    
+
+TEST_IMG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\test_images")
+
 def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
     # This is so all layers run in inference mode (batchnorm).
@@ -251,7 +253,7 @@ def generate_and_save_images(model, epoch, test_input):
         plt.imshow(predictions[i, :, :, 0], cmap='gray')
         plt.axis('off')
 
-    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
+    plt.savefig(os.path.join(TEST_IMG_PATH, f'image_at_epoch_{epoch:04}.png'))
     plt.close()
     # plt.show()
 
