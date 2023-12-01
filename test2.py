@@ -167,7 +167,7 @@ def make_discriminator_model():
     model.add(layers.Dropout(0.3))
 
     model.add(layers.Flatten())
-    model.add(layers.Dense(1, activation='sigmoid'))
+    model.add(layers.Dense(1))
 
     return model
 
@@ -222,7 +222,7 @@ def train_step(frame_pairs, real_middles):
 def train(frame_pairs, real_middles, epochs):
     for epoch in range(epochs):
         start = time.time()
-        pdb.set_trace()
+
         for i in range(len(frame_pairs)):
             current_frames = frame_pairs[i]
             ground_truth_middles = real_middles[i]
@@ -245,16 +245,7 @@ def generate_and_save_images(model, epoch, test_input):
 
     # Create a figure that's 256x256 pixels
     dpi = 142
-    fig = plt.figure(1, figsize=(256/dpi, 256/dpi), dpi=dpi)
-
-    # Create an axis with no axis labels or ticks and a black background
-    ax = fig.add_subplot(111)
-    ax.axis('off')
-    ax.set_facecolor("black")
-
-    # Set the plot axis to by 256 x 256 to match the pixels
-    ax.set_xlim(0, 256)
-    ax.set_ylim(0, 256)
+    plt.figure(1, figsize=(256/dpi, 256/dpi), dpi=dpi)
 
     for i in range(predictions.shape[0]):
         plt.imshow(predictions[i, :, :, 0], cmap='gray')
@@ -263,5 +254,6 @@ def generate_and_save_images(model, epoch, test_input):
     plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
     plt.close()
     # plt.show()
+
 
 train(frame_pairs, real_middles, EPOCHS)
