@@ -663,6 +663,8 @@ def main(args):
     if args.seed is not None:
         random.seed(args.seed)
         np.random.seed(args.seed)
+    if not os.path.exists(ROOT):
+        os.makedirs(ROOT)
     for i in range(args.iterations):
         # If a value wasn't specified, check a flag that will tell the program to make that value random each iteration
         randDirection, randRadius, randBase, randTriangleHeight, randWidth, randRectangleHeight, randSpeed = False, False, False, False, False, False, False
