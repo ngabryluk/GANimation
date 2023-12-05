@@ -65,9 +65,9 @@ def load():
     return frame_pairs, real_middles
 
 
-def to_gif(images):
+def to_gif(images, num):
     converted_images = np.clip(images, 0, 255).astype(np.uint8)
-    imageio.mimsave("./animation.gif", converted_images, fps=25)
+    imageio.mimsave(f"./animation-{num: 04}.gif", converted_images, fps=25)
     # return embed.embed_file("./animation.gif")
 
 
@@ -219,6 +219,13 @@ def train_step(frame_pairs, real_middles):
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
+checkpoint_dir = 'Data\\training_checkpoints'
+checkpoint_prefix = os.path.join(os.path.dirname(os.path.dirname(__file__)), checkpoint_dir, "ckpt")
+checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
+                                 discriminator_optimizer=discriminator_optimizer,
+                                 generator=generator,
+                                 discriminator=discriminator)
+
 def train(frame_pairs, real_middles, epochs):
     for epoch in range(epochs):
         start = time.time()
@@ -233,6 +240,10 @@ def train(frame_pairs, real_middles, epochs):
         # Produce images for the GIF as you go
         generate_and_save_images(generator, epoch + 1, frame_pairs[0, :, :, :256])
 
+        # Save the model every 10 epochs
+        if (epoch + 1) % 10 == 0:
+            checkpoint.save(file_prefix = checkpoint_prefix)
+
         print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
 
     # Generate after the final epoch
@@ -244,7 +255,7 @@ def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
     # This is so all layers run in inference mode (batchnorm).
     predictions = model(test_input, training=False)
-
+    pdb.set_trace()
     # Create a figure that's 256x256 pixels
     dpi = 142
     plt.figure(1, figsize=(256/dpi, 256/dpi), dpi=dpi)
@@ -255,7 +266,13 @@ def generate_and_save_images(model, epoch, test_input):
 
     plt.savefig(os.path.join(TEST_IMG_PATH, f'image_at_epoch_{epoch:04}.png'))
     plt.close()
+
+    # to_gif(np.asarray([test_input, predictions[0, :, :, 0]]), epoch)
     # plt.show()
 
 
-train(frame_pairs, real_middles, EPOCHS)
+# train(frame_pairs, real_middles, EPOCHS)
+
+checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
+pdb.set_trace()
+generate_and_save_images(generator, 150, )
