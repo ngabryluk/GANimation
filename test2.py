@@ -67,7 +67,7 @@ def load():
 
 def to_gif(images, num, fps):
     converted_images = np.clip(images, 0, 255).astype(np.uint8)
-    imageio.mimsave(f"./animation-{num: 04}.gif", converted_images, fps=fps)
+    imageio.mimsave(f"./animation-{num: 04}.gif", converted_images, duration=fps)
     # return embed.embed_file("./animation.gif")
 
 
@@ -265,7 +265,10 @@ def generate_and_save_images(model, epoch, test_input):
         ax = fig.add_subplot(111)
         ax.axis('off')
         fig.set_facecolor("black")
-        ax.set_facecolor("black")
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
         plt.imshow(predictions[i, :, :], cmap='gray')
 
         plt.savefig(os.path.join(DVD_SAVE_PATH, f'img{i:04}.png'))
@@ -280,15 +283,15 @@ def generate_and_save_images(model, epoch, test_input):
 checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 # pdb.set_trace()
 
-DVD_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\test_images")
-DVD_SAVE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\test_images_dvd")
+DVD_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\dvd_images")
+DVD_SAVE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\dvd_results")
 
 from PIL import Image
 # num_key_frames = 50
-# with Image.open(os.path.join(os.path.dirname(TEST_IMG_PATH), 'dvd.gif')) as im:
+# with Image.open(os.path.join(os.path.dirname(DVD_PATH), 'dvd.gif')) as im:
 #     for i in range(num_key_frames):
 #         im.seek(im.n_frames // num_key_frames * i)
-#         im.save(os.path.join(TEST_IMG_PATH, f'img{i:04}.png'))
+#         im.save(os.path.join(DVD_PATH, f'img{i:04}.png'))
 
 img_list = os.listdir(DVD_PATH)
 frameDVD = np.empty((25, 256, 256))
@@ -302,8 +305,6 @@ for i in range(0, len(img_list), 2):
     
     img1 = Image.open(filepath1).convert("L")  # Open the image and convert to grayscale
     img2 = Image.open(filepath2).convert("L")
-
-    # pdb.set_trace()
 
     arr1 = np.array(img1)
     arr2 = np.array(img2)
@@ -319,8 +320,23 @@ for i in range(0, len(img_list), 2):
     middles_index += 1
 
 generate_and_save_images(generator, 1, frameDVD)
-pdb.set_trace()
+# pdb.set_trace()
 
-######################################################
-# THE ARRAY IS ALL 0s, FIGURE OUT WHY THAT IS THE CASE
-######################################################
+img_list = os.listdir(DVD_SAVE_PATH)
+interpolate_DVD = np.empty((50, 256, 256))
+frame_index, middles_index = 0, 1
+for i in range(len(img_list)):
+    # Read the image as a numpy array
+    filepath1 = os.path.join(DVD_SAVE_PATH, img_list[i])
+
+    img1 = Image.open(filepath1).convert("L")
+
+    arr1 = np.array(img1)
+
+    interpolate_DVD[frame_index] = frameDVD[i]
+    interpolate_DVD[middles_index] = arr1
+
+    frame_index += 2
+    middles_index += 2
+
+to_gif(interpolate_DVD, 3, 100)
