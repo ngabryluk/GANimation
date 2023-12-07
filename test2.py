@@ -334,7 +334,7 @@ generate_and_save_images(generator, 1, frameDVD)
 # Putting the interpolated frames between 
 img_list = os.listdir(DVD_SAVE_PATH)
 interpolate_DVD = np.empty((50, 256, 256))
-frame_index, middles_index = 1, 0
+frame_index, middles_index = 0, 1
 for i in range(len(img_list)):
     # Read the image as a numpy array
     filepath1 = os.path.join(DVD_SAVE_PATH, img_list[i])
@@ -350,7 +350,7 @@ for i in range(len(img_list)):
 
     # pdb.set_trace()
 
-    interpolate_DVD[frame_index] = middleDVD[i]
+    interpolate_DVD[frame_index] = frameDVD[i]
     interpolate_DVD[middles_index] = arr1
 
     frame_index += 2
