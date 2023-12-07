@@ -67,7 +67,8 @@ def load():
 
 def to_gif(images, num, fps):
     converted_images = np.clip(images, 0, 255).astype(np.uint8)
-    imageio.mimsave(f"./animation-{num: 04}.gif", converted_images, duration=fps)
+    # imageio.mimsave(f"./animation-{num: 04}.gif", converted_images, duration=fps)
+    imageio.mimsave(f"./animation-{num: 04}.gif", converted_images, fps=fps)
     # return embed.embed_file("./animation.gif")
 
 
@@ -255,6 +256,7 @@ def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
     # This is so all layers run in inference mode (batchnorm).
     predictions = model(test_input, training=False)
+    # pdb.set_trace()
     predictions = np.array(predictions).reshape((25, 256, 256))
     # pdb.set_trace()
     
@@ -265,10 +267,7 @@ def generate_and_save_images(model, epoch, test_input):
         ax = fig.add_subplot(111)
         ax.axis('off')
         fig.set_facecolor("black")
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
-        ax.spines['left'].set_visible(False)
+        plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
         plt.imshow(predictions[i, :, :], cmap='gray')
 
         plt.savefig(os.path.join(DVD_SAVE_PATH, f'img{i:04}.png'))
@@ -283,20 +282,28 @@ def generate_and_save_images(model, epoch, test_input):
 checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 # pdb.set_trace()
 
-DVD_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\dvd_images")
-DVD_SAVE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\dvd_results")
+# DVD_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\dvd_images")
+# DVD_SAVE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data\\dvd_results")
+
+DVD_PATH = os.path.join(os.path.dirname(__file__), "test_images")
+DVD_SAVE_PATH = os.path.join(os.path.dirname(__file__), "test_images_dvd")
+# pdb.set_trace()
+
 
 from PIL import Image
+
+# Code that split the gif into 50 frames
 # num_key_frames = 50
 # with Image.open(os.path.join(os.path.dirname(DVD_PATH), 'dvd.gif')) as im:
 #     for i in range(num_key_frames):
 #         im.seek(im.n_frames // num_key_frames * i)
 #         im.save(os.path.join(DVD_PATH, f'img{i:04}.png'))
 
+# Save the frames and middle frames to np arrays
 img_list = os.listdir(DVD_PATH)
 frameDVD = np.empty((25, 256, 256))
 middleDVD = np.empty((25, 256, 256))
-allDVD = np.empty((50, 256, 256))
+allDVD = np.empty((50, 256, 256)) # I think this would have to change to continually increase frames
 frame_index, middles_index = 0, 0
 for i in range(0, len(img_list), 2):
     # Read the image as a numpy array
@@ -319,12 +326,15 @@ for i in range(0, len(img_list), 2):
     frame_index += 1
     middles_index += 1
 
+# Run the frames through the model and save the interpolated frames to test_images_dvd folder
 generate_and_save_images(generator, 1, frameDVD)
 # pdb.set_trace()
 
+
+# Putting the interpolated frames between 
 img_list = os.listdir(DVD_SAVE_PATH)
 interpolate_DVD = np.empty((50, 256, 256))
-frame_index, middles_index = 0, 1
+frame_index, middles_index = 1, 0
 for i in range(len(img_list)):
     # Read the image as a numpy array
     filepath1 = os.path.join(DVD_SAVE_PATH, img_list[i])
@@ -333,10 +343,18 @@ for i in range(len(img_list)):
 
     arr1 = np.array(img1)
 
-    interpolate_DVD[frame_index] = frameDVD[i]
+    # logo_mask = np.where(frameDVD[i] > 100)
+    # not_logo_mask = np.where(frameDVD[i] < 100)
+    # arr1[logo_mask] = 255
+    # arr1[not_logo_mask] = 0
+
+    # pdb.set_trace()
+
+    interpolate_DVD[frame_index] = middleDVD[i]
     interpolate_DVD[middles_index] = arr1
 
     frame_index += 2
     middles_index += 2
 
-to_gif(interpolate_DVD, 3, 100)
+# (arr of images, number for naming convention, fps)
+to_gif(interpolate_DVD, 1, 4)
